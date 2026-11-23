@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { RecommendBox } from "@/components/ai/RecommendBox";
 import { ExploreFilters } from "@/components/explore/ExploreFilters";
 import { ExploreResults, ResultsSkeleton } from "@/components/explore/ExploreResults";
 import { repo } from "@/lib/data";
@@ -26,6 +27,8 @@ export default function ExplorePage({ searchParams }: PageProps<"/explore">) {
           Filter by mood, era or difficulty, or just search for a favourite.
         </p>
       </header>
+
+      <RecommendBox />
 
       <div className="grid gap-12 lg:grid-cols-[18rem_1fr]">
         <aside className="lg:sticky lg:top-28 lg:self-start">

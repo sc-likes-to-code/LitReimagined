@@ -6,7 +6,7 @@ let client: SupabaseClient | null = null;
 
 /** Service-role client. Server only; bypasses RLS. Used for AI quota and cache tables. */
 export function getAdminClient(): SupabaseClient | null {
-  if (!isServiceRoleConfigured) return null;
+  if (!isServiceRoleConfigured()) return null;
   client ??= createClient(
     publicEnv.supabaseUrl!,
     getServerEnv().supabaseServiceRoleKey!,

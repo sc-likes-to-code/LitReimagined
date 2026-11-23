@@ -41,3 +41,20 @@ export function useUser(): AuthState {
 
   return { ...state, configured: isSupabaseConfigured };
 }
+
+/**
+ * Signs out and removes this person's reading data from the browser, so the next visitor on a
+ * shared computer never sees it (it stays safely in their account).
+ */
+export async function signOutAndClear() {
+  const [{ getBrowserClient }, { pauseSync }, { clearLibraryStores }] = await Promise.all(
+    [
+      import("@/lib/supabase/browser"),
+      import("@/lib/client/sync"),
+      import("@/lib/client/library"),
+    ],
+  );
+  pauseSync();
+  await getBrowserClient()?.auth.signOut();
+  clearLibraryStores();
+}

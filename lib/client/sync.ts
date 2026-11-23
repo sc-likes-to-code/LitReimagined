@@ -49,7 +49,14 @@ type HighlightRow = {
 
 const PUSH_DELAY = 1500;
 
+/** While true, nothing is pushed. Set before signing out so clearing local data can never delete cloud data. */
+let paused = false;
+export function pauseSync() {
+  paused = true;
+}
+
 export function startSync(sb: SupabaseClient, userId: string): () => void {
+  paused = false;
   let stopped = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
   const slugToId = new Map<string, string>();
@@ -156,7 +163,7 @@ export function startSync(sb: SupabaseClient, userId: string): () => void {
   }
 
   async function push() {
-    if (stopped || !ready) return;
+    if (stopped || !ready || paused) return;
     if (pushing) {
       dirty = true;
       return;

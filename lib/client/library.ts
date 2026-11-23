@@ -112,3 +112,11 @@ export function removeHighlight(id: string) {
 export function updatePrefs(patch: Partial<ReaderPrefs>) {
   prefsStore.set((prev) => ({ ...prev, ...patch }));
 }
+
+/** Empties the locally cached shelf, progress, bookmarks and highlights (used on sign-out). */
+export function clearLibraryStores() {
+  shelfStore.set({});
+  progressStore.set({});
+  bookmarkStore.set([]);
+  highlightStore.set([]);
+}

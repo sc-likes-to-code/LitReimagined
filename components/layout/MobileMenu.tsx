@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { useUser } from "@/lib/client/auth";
+import { signOutAndClear, useUser } from "@/lib/client/auth";
 import { siteConfig } from "@/config/site";
 
 /** Full-screen menu for small screens. Closes itself whenever the route changes. */
 export function MobileMenu() {
   const pathname = usePathname();
+  const router = useRouter();
   // Remember which page the menu was opened on; navigating elsewhere closes it with no effect needed.
   const [openedOn, setOpenedOn] = useState<string | null>(null);
   const open = openedOn === pathname;
@@ -98,6 +99,20 @@ export function MobileMenu() {
               ))}
             </ul>
             <div className="flex items-center justify-between gap-4">
+              {user && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await signOutAndClear();
+                    setOpenedOn(null);
+                    router.push("/");
+                    router.refresh();
+                  }}
+                  className="bg-ink text-bg rounded-full px-7 py-3.5 font-medium whitespace-nowrap"
+                >
+                  Sign out
+                </button>
+              )}
               {!user && (
                 <Link
                   href="/login"

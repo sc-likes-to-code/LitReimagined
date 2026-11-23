@@ -60,8 +60,9 @@ export function cleanParagraph(p: string): string {
   return p
     .replace(/\[Illustration[^\]]*\]/gi, "")
     .replace(/\[Footnote[^\]]*\]/gi, "")
-    .replace(/_([^_\n]+)_/g, "$1")
     .replace(/\s*\n\s*/g, " ")
+    // Italic markers, including ones that wrapped across lines in the source.
+    .replace(/_([^_]+)_/g, "$1")
     .replace(/[ \t]{2,}/g, " ")
     .trim();
 }

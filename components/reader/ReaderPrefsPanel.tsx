@@ -67,6 +67,16 @@ export function ReaderPrefsPanel({
         </button>
       </div>
       <div className="divide-y divide-[var(--line)]">
+        <Row label="Reading view">
+          <Seg
+            value={prefs.mode}
+            onChange={(mode) => updatePrefs({ mode })}
+            options={[
+              { value: "book", label: "Book" },
+              { value: "scroll", label: "Scroll" },
+            ]}
+          />
+        </Row>
         <Row label="Text size">
           <div className="flex items-center gap-3">
             <input
@@ -95,17 +105,19 @@ export function ReaderPrefsPanel({
             className="w-28 accent-[var(--ember)]"
           />
         </Row>
-        <Row label="Width">
-          <Seg
-            value={prefs.measure}
-            onChange={(measure) => updatePrefs({ measure })}
-            options={[
-              { value: "narrow", label: "Narrow" },
-              { value: "medium", label: "Medium" },
-              { value: "wide", label: "Wide" },
-            ]}
-          />
-        </Row>
+        {prefs.mode === "scroll" && (
+          <Row label="Width">
+            <Seg
+              value={prefs.measure}
+              onChange={(measure) => updatePrefs({ measure })}
+              options={[
+                { value: "narrow", label: "Narrow" },
+                { value: "medium", label: "Medium" },
+                { value: "wide", label: "Wide" },
+              ]}
+            />
+          </Row>
+        )}
         <Row label="Typeface">
           <Seg
             value={prefs.family}
@@ -116,16 +128,18 @@ export function ReaderPrefsPanel({
             ]}
           />
         </Row>
-        <Row label="Focus mode">
-          <Seg
-            value={prefs.focus ? "on" : "off"}
-            onChange={(v) => updatePrefs({ focus: v === "on" })}
-            options={[
-              { value: "off", label: "Off" },
-              { value: "on", label: "On" },
-            ]}
-          />
-        </Row>
+        {prefs.mode === "scroll" && (
+          <Row label="Focus mode">
+            <Seg
+              value={prefs.focus ? "on" : "off"}
+              onChange={(v) => updatePrefs({ focus: v === "on" })}
+              options={[
+                { value: "off", label: "Off" },
+                { value: "on", label: "On" },
+              ]}
+            />
+          </Row>
+        )}
         <Row label="Theme">
           <ThemeToggle />
         </Row>
@@ -133,7 +147,12 @@ export function ReaderPrefsPanel({
       <button
         type="button"
         onClick={() =>
-          updatePrefs({ ...DEFAULT_PREFS, level: prefs.level, view: prefs.view })
+          updatePrefs({
+            ...DEFAULT_PREFS,
+            level: prefs.level,
+            view: prefs.view,
+            mode: prefs.mode,
+          })
         }
         className="text-muted hover:text-ink mt-3 text-xs underline underline-offset-4"
       >

@@ -43,6 +43,8 @@ export type ReaderPrefs = {
   view: "single" | "split";
   level: Level;
   focus: boolean;
+  /** "book" turns pages like a printed book; "scroll" is the continuous reader. */
+  mode: "book" | "scroll";
 };
 
 export const DEFAULT_PREFS: ReaderPrefs = {
@@ -53,6 +55,7 @@ export const DEFAULT_PREFS: ReaderPrefs = {
   view: "single",
   level: 2,
   focus: false,
+  mode: "scroll",
 };
 
 export const shelfStore = createStore<Record<string, ShelfEntry>>("shelf", {});

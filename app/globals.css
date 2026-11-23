@@ -310,3 +310,56 @@ body::after {
 /* Version labels above the side-by-side reader columns. */
 .eyebrow.label-original { color: var(--label-original); }
 .eyebrow.label-modern { color: var(--label-modern); }
+
+/* ---------------------------------------------------------------- book view */
+.book-text p {
+  margin: 0;
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  overflow-wrap: break-word;
+}
+.book-page {
+  background: var(--bg-elev);
+  color: var(--text);
+  box-shadow: 0 34px 60px -34px rgb(var(--shadow-color) / 0.6);
+}
+.book-page-left {
+  border-radius: 16px 3px 3px 16px;
+  background-image: linear-gradient(to left, rgb(var(--shadow-color) / 0.16), transparent 11%);
+  /* the edge of the stack of pages */
+  box-shadow:
+    -2px 0 0 var(--bg-elev),
+    -3px 0 0 var(--line),
+    -5px 0 0 var(--bg-elev),
+    -6px 0 0 var(--line),
+    0 34px 60px -34px rgb(var(--shadow-color) / 0.6);
+}
+.book-page-right {
+  border-radius: 3px 16px 16px 3px;
+  background-image: linear-gradient(to right, rgb(var(--shadow-color) / 0.16), transparent 11%);
+  box-shadow:
+    2px 0 0 var(--bg-elev),
+    3px 0 0 var(--line),
+    5px 0 0 var(--bg-elev),
+    6px 0 0 var(--line),
+    0 34px 60px -34px rgb(var(--shadow-color) / 0.6);
+}
+.book-page-single {
+  border-radius: 14px;
+}
+.book-edge {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  font-size: 2.4rem;
+  line-height: 1;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+.book-edge-prev {
+  left: 0.6rem;
+}
+.book-edge-next {
+  right: 0.6rem;
+}

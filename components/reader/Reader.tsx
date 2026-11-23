@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LevelSlider } from "@/components/reader/LevelSlider";
 import { Paragraph } from "@/components/reader/Paragraph";
+import { ModeToggle } from "@/components/reader/ModeToggle";
 import { ReadAloudBar } from "@/components/reader/ReadAloudBar";
 import { StreakChip } from "@/components/reader/StreakChip";
 import { ReaderPrefsPanel } from "@/components/reader/ReaderPrefsPanel";
@@ -339,6 +340,7 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
           </p>
           <div className="flex items-center gap-2">
             <StreakChip />
+          <ModeToggle />
             <button
               type="button"
               onClick={() => setShowPrefs((v) => !v)}

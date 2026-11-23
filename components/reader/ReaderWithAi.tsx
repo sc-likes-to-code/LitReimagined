@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { AiPanel, type AiPanelRequest } from "@/components/ai/AiPanel";
+import { BookReader } from "@/components/reader/BookReader";
 import { Reader, type AiRequest } from "@/components/reader/Reader";
-import { addHighlight } from "@/lib/client/library";
+import { addHighlight, useReaderPrefs } from "@/lib/client/library";
 import type { Chapter, ChapterSummary } from "@/lib/data/types";
+import { tidyOriginal } from "@/lib/reader/tidy";
 
 type Props = {
   book: { slug: string; title: string; authorName: string };
@@ -13,14 +15,25 @@ type Props = {
 };
 
 /** Hosts the reader and the live AI panel (rewrite / explain) opened from the selection toolbar. */
-export function ReaderWithAi(props: Props) {
+export function ReaderWithAi({ chapter: rawChapter, ...rest }: Props) {
+  const chapter = useMemo(
+    () => ({ ...rawChapter, original: rawChapter.original.map(tidyOriginal) }),
+    [rawChapter],
+  );
+  const props = { ...rest, chapter };
   const [request, setRequest] = useState<AiPanelRequest | null>(null);
+  const mode = useReaderPrefs().mode;
 
   const open = useCallback(
     (r: AiRequest) =>
       setRequest({ ...r, book: `${props.book.title} by ${props.book.authorName}` }),
     [props.book.title, props.book.authorName],
   );
+
+  if (mode === "book")
+    return (
+      <BookReader book={props.book} chapter={props.chapter} chapters={props.chapters} />
+    );
 
   return (
     <>

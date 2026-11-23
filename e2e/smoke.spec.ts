@@ -144,7 +144,10 @@ test.describe("accessibility", () => {
   }
 });
 
-test("a selected passage becomes a downloadable quote card", async ({ page, isMobile }) => {
+test("a selected passage becomes a downloadable quote card", async ({
+  page,
+  isMobile,
+}) => {
   test.skip(isMobile, "Download checks run on desktop.");
   await page.goto("/read/pride-and-prejudice/1", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "Original", exact: true }).click();
@@ -170,7 +173,8 @@ test("a selected passage becomes a downloadable quote card", async ({ page, isMo
   const painted = await dialog.locator("canvas").evaluate((c: HTMLCanvasElement) => {
     const d = c.getContext("2d")!.getImageData(0, 0, c.width, c.height).data;
     const seen = new Set<number>();
-    for (let i = 0; i < d.length; i += 4 * 997) seen.add((d[i] << 16) | (d[i + 1] << 8) | d[i + 2]);
+    for (let i = 0; i < d.length; i += 4 * 997)
+      seen.add((d[i] << 16) | (d[i + 1] << 8) | d[i + 2]);
     return seen.size;
   });
   expect(painted).toBeGreaterThan(20);
@@ -231,7 +235,9 @@ test("read aloud speaks paragraph by paragraph and can be paused and stopped", a
     });
   });
 
-  await page.goto("/read/alices-adventures-in-wonderland/1", { waitUntil: "networkidle" });
+  await page.goto("/read/alices-adventures-in-wonderland/1", {
+    waitUntil: "networkidle",
+  });
   await page.getByRole("button", { name: "Read aloud" }).click();
   const bar = page.getByRole("region", { name: "Read aloud" });
   await expect(bar).toBeVisible();
@@ -255,11 +261,18 @@ test("read aloud speaks paragraph by paragraph and can be paused and stopped", a
   await expect(page.locator('[data-speaking="true"]')).toHaveCount(0);
 });
 
-test("side-by-side view labels each column with its version", async ({ page, isMobile }) => {
+test("side-by-side view labels each column with its version", async ({
+  page,
+  isMobile,
+}) => {
   test.skip(isMobile, "The sticky column header is a desktop layout.");
-  await page.goto("/read/alices-adventures-in-wonderland/1", { waitUntil: "networkidle" });
+  await page.goto("/read/alices-adventures-in-wonderland/1", {
+    waitUntil: "networkidle",
+  });
   await page.keyboard.press("s");
-  const header = page.locator("div[aria-hidden='true']", { hasText: "Original version" }).first();
+  const header = page
+    .locator("div[aria-hidden='true']", { hasText: "Original version" })
+    .first();
   await expect(header).toContainText("Original version");
   await expect(header).toContainText("Modern version");
 });
@@ -272,20 +285,33 @@ const daysAgo = (n: number) => {
 };
 
 test("reading for a while records words for today", async ({ page }) => {
-  await page.goto("/read/alices-adventures-in-wonderland/1", { waitUntil: "networkidle" });
+  await page.goto("/read/alices-adventures-in-wonderland/1", {
+    waitUntil: "networkidle",
+  });
   await page.waitForTimeout(1300);
   await page.locator('[data-row="3"]').scrollIntoViewIfNeeded();
-  await page.locator('[data-row="3"]').evaluate((el) => el.scrollIntoView({ block: "center" }));
+  await page
+    .locator('[data-row="3"]')
+    .evaluate((el) => el.scrollIntoView({ block: "center" }));
   await page.waitForTimeout(1500);
   const words = await page.evaluate(() => {
     const raw = localStorage.getItem("lr:activity:v1");
-    return raw ? (Object.values(JSON.parse(raw)) as number[]).reduce((a, b) => a + b, 0) : 0;
+    return raw
+      ? (Object.values(JSON.parse(raw)) as number[]).reduce((a, b) => a + b, 0)
+      : 0;
   });
   expect(words).toBeGreaterThan(20);
 });
 
-test("the library shows the streak and calendar from reading history", async ({ page }) => {
-  const activity = { [daysAgo(0)]: 400, [daysAgo(1)]: 220, [daysAgo(2)]: 180, [daysAgo(5)]: 900 };
+test("the library shows the streak and calendar from reading history", async ({
+  page,
+}) => {
+  const activity = {
+    [daysAgo(0)]: 400,
+    [daysAgo(1)]: 220,
+    [daysAgo(2)]: 180,
+    [daysAgo(5)]: 900,
+  };
   await page.addInitScript((a) => {
     localStorage.setItem("lr:activity:v1", JSON.stringify(a));
     localStorage.setItem(
@@ -297,16 +323,204 @@ test("the library shows the streak and calendar from reading history", async ({ 
 
   const section = page.getByRole("region", { name: "Reading rhythm" });
   await expect(section).toContainText("Today is done");
-  await expect(section.getByText("Day streak").locator("..").getByText("3", { exact: true })).toBeVisible();
-  await expect(section.getByText("Days read").locator("..").getByText("4", { exact: true })).toBeVisible();
+  await expect(
+    section.getByText("Day streak").locator("..").getByText("3", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    section.getByText("Days read").locator("..").getByText("4", { exact: true }),
+  ).toBeVisible();
   await expect(section.getByRole("img", { name: /Reading calendar/ })).toBeVisible();
 });
 
 test("the reader header shows the flame once there is a streak", async ({ page }) => {
-  await page.addInitScript((a) => localStorage.setItem("lr:activity:v1", JSON.stringify(a)), {
-    [daysAgo(0)]: 300,
-    [daysAgo(1)]: 300,
+  await page.addInitScript(
+    (a) => localStorage.setItem("lr:activity:v1", JSON.stringify(a)),
+    {
+      [daysAgo(0)]: 300,
+      [daysAgo(1)]: 300,
+    },
+  );
+  await page.goto("/read/alices-adventures-in-wonderland/1", {
+    waitUntil: "networkidle",
   });
-  await page.goto("/read/alices-adventures-in-wonderland/1", { waitUntil: "networkidle" });
   await expect(page.getByRole("link", { name: /2-day reading streak/ })).toBeVisible();
+});
+
+/** Reads the "Pages 3–4 of 30" / "Page 4 of 17" status and returns [current, total]. */
+async function pageStatus(page: import("@playwright/test").Page) {
+  const text =
+    (await page.getByRole("status").filter({ hasText: /Page/ }).first().textContent()) ??
+    "";
+  const nums = text.match(/\d+/g)!.map(Number);
+  return { first: nums[0], total: nums[nums.length - 1], text };
+}
+
+const bookPrefs = (extra: object = {}) => ({ mode: "book", level: 2, ...extra });
+
+test.describe("book view", () => {
+  test("shows original and modern pages side by side and turns pages", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "Two-page spreads are a desktop layout.");
+    await page.addInitScript(
+      (p) => localStorage.setItem("lr:prefs:v1", JSON.stringify(p)),
+      bookPrefs(),
+    );
+    await page.goto("/read/alices-adventures-in-wonderland/1", {
+      waitUntil: "networkidle",
+    });
+
+    const book = page.getByRole("region", { name: /Down the Rabbit-Hole/ });
+    await expect(book.getByText("Original version")).toBeVisible();
+    await expect(book.getByText("Modern version")).toBeVisible();
+    expect((await pageStatus(page)).text).toMatch(/Pages 1–2 of/);
+
+    // The slider only chooses the right-hand version: no Original option.
+    const dock = page.locator("div.glass").last();
+    await expect(dock.getByRole("button", { name: "Original" })).toHaveCount(0);
+    await dock.getByRole("button", { name: "Contemporary" }).isDisabled();
+
+    await page.keyboard.press("ArrowRight");
+    expect((await pageStatus(page)).text).toMatch(/Pages 3–4 of/);
+    await page.keyboard.press("ArrowLeft");
+    expect((await pageStatus(page)).text).toMatch(/Pages 1–2 of/);
+
+    // Clicking the outer edge of the right page turns forward; the left edge of the left page, back.
+    const pages = page.locator(".book-page");
+    const right = (await pages.nth(1).boundingBox())!;
+    await page.mouse.click(right.x + right.width * 0.9, right.y + right.height / 2);
+    expect((await pageStatus(page)).text).toMatch(/Pages 3–4 of/);
+    const left = (await pages.nth(0).boundingBox())!;
+    await page.mouse.click(left.x + left.width * 0.1, left.y + left.height / 2);
+    expect((await pageStatus(page)).text).toMatch(/Pages 1–2 of/);
+  });
+
+  for (const path of [
+    "/read/alices-adventures-in-wonderland/2",
+    "/read/moby-dick/1", // very long paragraphs
+  ])
+    test(`every word of ${path} appears, and no page overflows`, async ({
+      page,
+      isMobile,
+    }) => {
+      // The words the scrolling reader shows are the reference.
+      await page.goto(path, {
+        waitUntil: "networkidle",
+      });
+      await page.evaluate(() =>
+        localStorage.setItem("lr:prefs:v1", JSON.stringify({ mode: "scroll", level: 0 })),
+      );
+      await page.reload({ waitUntil: "networkidle" });
+      const expected = (await page.locator('[data-src="original"]').allTextContents())
+        .join(" ")
+        .split(/\s+/)
+        .filter(Boolean);
+      expect(expected.length).toBeGreaterThan(500);
+
+      await page.evaluate(
+        (p) => localStorage.setItem("lr:prefs:v1", JSON.stringify(p)),
+        bookPrefs(),
+      );
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(
+        page
+          .getByRole("region", { name: /book/i })
+          .or(page.locator(".book-page").first()),
+      ).toBeVisible();
+
+      const seen: string[] = [];
+      const { total } = await pageStatus(page);
+      const turns = isMobile ? total : Math.ceil(total / 2);
+      for (let i = 0; i < turns; i++) {
+        const pagesNow = await page.locator(".book-text").evaluateAll((els) =>
+          els.map((el) => ({
+            clipped: el.scrollHeight > el.clientHeight + 1,
+            // On a spread, only the left page carries the original text.
+            text: Array.from(el.querySelectorAll("p[data-p]")).map(
+              (p) => p.textContent ?? "",
+            ),
+          })),
+        );
+        expect(
+          pagesNow.every((p) => !p.clipped),
+          `page set ${i + 1} overflows`,
+        ).toBe(true);
+        // Left page on desktop; the single page (original side) on mobile.
+        seen.push(...pagesNow[0].text);
+        if (i < turns - 1) await page.keyboard.press("ArrowRight");
+        if (isMobile && i < turns - 1) await page.waitForTimeout(0);
+      }
+      // On mobile the single page defaults to the modern text, so only compare originals on desktop.
+      if (!isMobile) {
+        const got = seen.join(" ").split(/\s+/).filter(Boolean);
+        expect(got.join(" ")).toBe(expected.join(" "));
+      }
+    });
+
+  test("a chapter with no modern version flows across both pages", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "Two-page spreads are a desktop layout.");
+    await page.addInitScript(
+      (p) => localStorage.setItem("lr:prefs:v1", JSON.stringify(p)),
+      bookPrefs(),
+    );
+    await page.goto("/read/pride-and-prejudice/2", { waitUntil: "networkidle" });
+    await expect(page.getByText(/still being written/i)).toBeVisible();
+    const texts = await page
+      .locator(".book-text")
+      .evaluateAll((els) => els.map((el) => el.querySelectorAll("p[data-p]").length));
+    expect(texts).toHaveLength(2);
+    expect(texts[0]).toBeGreaterThan(0);
+    expect(texts[1]).toBeGreaterThan(0);
+  });
+
+  test("on a phone one page shows at a time with an Original / Modern switch", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, "Phone layout");
+    await page.addInitScript(
+      (p) => localStorage.setItem("lr:prefs:v1", JSON.stringify(p)),
+      bookPrefs(),
+    );
+    await page.goto("/read/alices-adventures-in-wonderland/1", {
+      waitUntil: "networkidle",
+    });
+    await expect(page.locator(".book-page")).toHaveCount(1);
+    const group = page.getByRole("group", { name: "Version" });
+    await expect(group.getByRole("button", { name: "Modern" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    const modernText = await page.locator(".book-text p[data-p]").first().textContent();
+    await group.getByRole("button", { name: "Original" }).click();
+    await expect(group.getByRole("button", { name: "Original" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(await page.locator(".book-text p[data-p]").first().textContent()).not.toBe(
+      modernText,
+    );
+
+    await page.keyboard.press("ArrowRight");
+    expect((await pageStatus(page)).first).toBe(2);
+  });
+
+  test("the toggle switches between book and scroll and remembers the choice", async ({
+    page,
+  }) => {
+    await page.goto("/read/alices-adventures-in-wonderland/1", {
+      waitUntil: "networkidle",
+    });
+    await expect(page.locator(".book-page")).toHaveCount(0);
+    await page.getByRole("button", { name: "Switch to book view" }).click();
+    await expect(page.locator(".book-page").first()).toBeVisible();
+    await page.reload({ waitUntil: "networkidle" });
+    await expect(page.locator(".book-page").first()).toBeVisible();
+    await page.getByRole("button", { name: "Switch to scrolling view" }).click();
+    await expect(page.locator(".book-page")).toHaveCount(0);
+  });
 });

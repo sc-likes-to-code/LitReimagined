@@ -10,6 +10,7 @@ import { Shelf } from "@/components/home/Shelf";
 import { SliderDemo } from "@/components/home/SliderDemo";
 import { Reveal } from "@/components/motion/Reveal";
 import { ButtonLink } from "@/components/ui/Button";
+import { demoContent } from "@/data/demo/content";
 import { repo } from "@/lib/data";
 
 const STEPS = [
@@ -50,18 +51,18 @@ const FEATURES = [
 ];
 
 export default async function Home() {
-  const [featured, all, collections, sample] = await Promise.all([
+  const [featured, all, collections] = await Promise.all([
     repo.listBooks({ sort: "featured" }),
     repo.listBooks({ sort: "title" }),
     repo.listCollections(),
-    repo.getChapter("pride-and-prejudice", 1),
   ]);
+  // The homepage showcase is a hand-written three-level passage, so it never depends on the database.
+  const sample = demoContent["pride-and-prejudice"];
 
   const heroBooks = featured.slice(0, 5);
   const shorts = collections.find((c) => c.slug === "short-and-brilliant");
   const gothic = collections.find((c) => c.slug === "dark-and-gothic");
-  const canDemo =
-    sample?.translations[1] && sample.translations[2] && sample.translations[3];
+  const canDemo = Boolean(sample);
 
   return (
     <>
@@ -128,11 +129,7 @@ export default async function Home() {
               <SliderDemo
                 source="Pride and Prejudice · Jane Austen"
                 original={sample.original}
-                levels={{
-                  1: sample.translations[1]!,
-                  2: sample.translations[2]!,
-                  3: sample.translations[3]!,
-                }}
+                levels={sample.levels}
               />
             </Reveal>
           </div>

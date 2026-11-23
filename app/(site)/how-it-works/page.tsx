@@ -3,7 +3,7 @@ import Link from "next/link";
 import { SliderDemo } from "@/components/home/SliderDemo";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Prose } from "@/components/ui/Prose";
-import { repo } from "@/lib/data";
+import { demoContent } from "@/data/demo/content";
 
 export const metadata: Metadata = {
   title: "How it works",
@@ -11,10 +11,9 @@ export const metadata: Metadata = {
     "How LitReimagined modernizes classic literature with AI, what we promise about quality, and how to see the original at any time.",
 };
 
-export default async function HowItWorksPage() {
-  const sample = await repo.getChapter("alices-adventures-in-wonderland", 1);
-  const canDemo =
-    sample?.translations[1] && sample.translations[2] && sample.translations[3];
+export default function HowItWorksPage() {
+  const sample = demoContent["alices-adventures-in-wonderland"];
+  const canDemo = Boolean(sample);
 
   return (
     <div className="container-page pt-[calc(var(--nav-h)+4rem)]">
@@ -84,11 +83,7 @@ export default async function HowItWorksPage() {
           <SliderDemo
             source="Alice's Adventures in Wonderland · Lewis Carroll"
             original={sample.original}
-            levels={{
-              1: sample.translations[1]!,
-              2: sample.translations[2]!,
-              3: sample.translations[3]!,
-            }}
+            levels={sample.levels}
           />
         </section>
       )}

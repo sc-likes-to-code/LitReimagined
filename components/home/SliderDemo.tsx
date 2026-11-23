@@ -8,13 +8,15 @@ import { LEVEL_LABELS, type Level } from "@/lib/data/types";
 type Props = {
   source: string;
   original: string[];
-  levels: { 1: string[]; 2: string[]; 3: string[] };
+  /** Only the levels that exist for this passage; missing levels are disabled in the slider. */
+  levels: Partial<Record<1 | 2 | 3, string[]>>;
 };
 
 /** A live, free taste of the product: drag to modernize a famous passage. */
 export function SliderDemo({ source, original, levels }: Props) {
   const [level, setLevel] = useState<Level>(0);
-  const paras = level === 0 ? original : levels[level];
+  const available = ([1, 2, 3] as const).filter((l) => levels[l]) as Level[];
+  const paras = (level === 0 ? original : levels[level]) ?? original;
 
   return (
     <div className="glass rounded-[2rem] p-6 sm:p-10">
@@ -41,7 +43,12 @@ export function SliderDemo({ source, original, levels }: Props) {
           </p>
         ))}
       </div>
-      <LevelSlider value={level} onChange={setLevel} className="mt-8" />
+      <LevelSlider
+        value={level}
+        onChange={setLevel}
+        available={available}
+        className="mt-8"
+      />
     </div>
   );
 }

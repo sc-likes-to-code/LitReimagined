@@ -52,8 +52,16 @@ async function BookView({ params }: { params: PageProps<"/books/[slug]">["params
     repo.listBooks({ genre: book.genres[0], sort: "featured" }),
   ]);
   const similar = related.filter((b) => b.slug !== slug).slice(0, 5);
-  const canDemo =
-    sample?.translations[1] && sample.translations[2] && sample.translations[3];
+  const hasModern = Boolean(
+    sample?.translations[1] || sample?.translations[2] || sample?.translations[3],
+  );
+  // Preview the first few real paragraphs, skipping headings, dates and one-line salutations.
+  const previewIdx = sample
+    ? sample.original.flatMap((p, i) => (p.length >= 60 ? [i] : [])).slice(0, 3)
+    : [];
+  const pick = (paras?: string[]) =>
+    paras ? previewIdx.map((i) => paras[i]) : undefined;
+  const canDemo = hasModern && previewIdx.length > 0;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -185,11 +193,11 @@ async function BookView({ params }: { params: PageProps<"/books/[slug]">["params
           <div className="max-w-3xl">
             <SliderDemo
               source={`${book.title} · ${sample.title}`}
-              original={sample.original}
+              original={pick(sample.original)!}
               levels={{
-                1: sample.translations[1]!,
-                2: sample.translations[2]!,
-                3: sample.translations[3]!,
+                1: pick(sample.translations[1]),
+                2: pick(sample.translations[2]),
+                3: pick(sample.translations[3]),
               }}
             />
           </div>

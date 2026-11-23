@@ -64,13 +64,18 @@ test("explore filters update the URL and the results", async ({ page }) => {
   await expect(page).not.toHaveURL(/genre=/);
 });
 
-test("the reader switches levels, bookmarks and saves progress", async ({ page }) => {
+test("the reader switches between the original and the modern version", async ({
+  page,
+}) => {
   await page.goto("/read/pride-and-prejudice/1");
   const body = page.locator("article");
   await page.getByRole("button", { name: "Original", exact: true }).click();
   await expect(body).toContainText("It is a truth universally acknowledged");
-  await page.getByRole("button", { name: "Contemporary", exact: true }).click();
-  await expect(body).toContainText("rich, single guy");
+  await page.getByRole("button", { name: "Modern", exact: true }).click();
+  await expect(body).toContainText("It is a truth everyone accepts");
+  // Chapters without a modern version fall back to the original with a notice.
+  await page.goto("/read/pride-and-prejudice/2");
+  await expect(page.getByText(/still being written/i)).toBeVisible();
 });
 
 test("a book can be added to the shelf and appears in the library", async ({ page }) => {

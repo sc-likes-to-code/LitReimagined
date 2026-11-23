@@ -15,7 +15,8 @@
     "content:translate": "tsx scripts/translate.ts",
     "content:glossary": "tsx scripts/glossary.ts",
     "content:embed": "tsx scripts/embed.ts",
-    "content:status": "tsx scripts/status.ts"
+    "content:status": "tsx scripts/status.ts",
+    "content:revalidate": "tsx scripts/revalidate.ts"
   },
   "dependencies": {
     "@google/genai": "^3.6.1",

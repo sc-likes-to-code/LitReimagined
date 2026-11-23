@@ -61,6 +61,7 @@ export function getServerEnv() {
     aiDailyLimitAnon: optionalInt(process.env.AI_DAILY_LIMIT_ANON),
     aiDailyLimitUser: optionalInt(process.env.AI_DAILY_LIMIT_USER),
     aiGlobalDailyCeiling: optionalInt(process.env.AI_GLOBAL_DAILY_CEILING),
+    revalidateSecret: clean(process.env.REVALIDATE_SECRET),
   };
 }
 

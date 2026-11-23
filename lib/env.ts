@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 /**
  * Typed, forgiving environment loader.
  *
@@ -35,7 +33,11 @@ const siteUrl = (() => {
 const supabaseUrl = (() => {
   const v = clean(process.env.NEXT_PUBLIC_SUPABASE_URL);
   if (!v) return undefined;
-  return z.url().safeParse(v).success ? v : undefined;
+  try {
+    return /^https?:$/.test(new URL(v).protocol) ? v : undefined;
+  } catch {
+    return undefined;
+  }
 })();
 
 // NEXT_PUBLIC_* values must be referenced statically so Next can inline them.

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter, Newsreader } from "next/font/google";
 import "./globals.css";
 import { SyncProvider } from "@/components/layout/SyncProvider";
+import { MotionProvider } from "@/components/motion/MotionProvider";
 import { Cursor } from "@/components/motion/Cursor";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { publicEnv } from "@/lib/env";
@@ -26,6 +27,8 @@ const newsreader = Newsreader({
   subsets: ["latin"],
   style: ["normal", "italic"],
   display: "swap",
+  // The reading face is only needed on reader and quote blocks, so skip the preload hint.
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -76,7 +79,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SmoothScroll />
         <SyncProvider />
         <Cursor />
-        {children}
+        <MotionProvider>{children}</MotionProvider>
       </body>
     </html>
   );

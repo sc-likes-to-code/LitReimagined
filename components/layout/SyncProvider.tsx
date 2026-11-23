@@ -2,8 +2,6 @@
 
 import { useEffect } from "react";
 import { useUser } from "@/lib/client/auth";
-import { startSync } from "@/lib/client/sync";
-import { getBrowserClient } from "@/lib/supabase/browser";
 
 /** Mounts once at the root: syncs guest data with the account whenever someone is signed in. */
 export function SyncProvider() {
@@ -11,9 +9,23 @@ export function SyncProvider() {
   const userId = user?.id;
 
   useEffect(() => {
-    const sb = getBrowserClient();
-    if (!sb || !userId) return;
-    return startSync(sb, userId);
+    if (!userId) return;
+    let stop: (() => void) | undefined;
+    let cancelled = false;
+
+    // Loaded only for signed-in readers.
+    void Promise.all([
+      import("@/lib/client/sync"),
+      import("@/lib/supabase/browser"),
+    ]).then(([{ startSync }, { getBrowserClient }]) => {
+      const sb = getBrowserClient();
+      if (!sb || cancelled) return;
+      stop = startSync(sb, userId);
+    });
+    return () => {
+      cancelled = true;
+      stop?.();
+    };
   }, [userId]);
 
   return null;

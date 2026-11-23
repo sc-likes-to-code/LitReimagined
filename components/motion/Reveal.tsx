@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 
 type Props = {
@@ -14,7 +14,7 @@ type Props = {
 /** Fades and lifts content in once as it enters the viewport. */
 export function Reveal({ children, delay = 0, y = 24, className, as = "div" }: Props) {
   const reduce = useReducedMotion();
-  const Comp = motion[as];
+  const Comp = m[as];
   return (
     <Comp
       className={className}

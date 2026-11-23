@@ -1,4 +1,10 @@
 import Link from "next/link";
+import {
+  FernDoodle,
+  OrbitDoodle,
+  QuillDoodle,
+  TypewriterDoodle,
+} from "@/components/brand/Doodles";
 import { HeroCovers } from "@/components/home/HeroCovers";
 import { Shelf } from "@/components/home/Shelf";
 import { SliderDemo } from "@/components/home/SliderDemo";
@@ -69,6 +75,14 @@ export default async function Home() {
               "radial-gradient(closest-side, rgb(255 90 54 / 0.35), rgb(76 201 240 / 0.12) 55%, transparent)",
           }}
         />
+        <QuillDoodle
+          className="absolute top-40 left-[4%] hidden w-28 -rotate-12 xl:block"
+          delay={0.3}
+        />
+        <OrbitDoodle
+          className="absolute top-52 right-[5%] hidden w-32 xl:block"
+          delay={0.5}
+        />
         <div className="container-page text-center">
           <p className="eyebrow mb-8">Classic literature · Modern voice</p>
           <h1 className="font-display mx-auto max-w-5xl text-[clamp(2.75rem,8vw,6.5rem)] leading-[0.95] tracking-tight">
@@ -96,7 +110,8 @@ export default async function Home() {
 
       {/* SLIDER DEMO */}
       {canDemo && sample && (
-        <section id="try-it" className="container-page scroll-mt-28 py-24">
+        <section id="try-it" className="container-page relative scroll-mt-28 py-24">
+          <TypewriterDoodle className="absolute -bottom-2 left-[2%] hidden w-44 xl:block" />
           <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
             <Reveal>
               <p className="eyebrow mb-4">The signature feature</p>
@@ -137,7 +152,8 @@ export default async function Home() {
       </div>
 
       {/* HOW IT WORKS */}
-      <section className="border-line border-y py-24">
+      <section className="border-line relative overflow-hidden border-y py-24">
+        <FernDoodle className="absolute top-8 right-[4%] hidden h-72 xl:block" />
         <div className="container-page">
           <Reveal className="mb-14 max-w-xl">
             <p className="eyebrow mb-4">How it works</p>

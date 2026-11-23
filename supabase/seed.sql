@@ -1,0 +1,2 @@
+-- Intentionally empty. Content is loaded by the ingestion scripts in /scripts
+-- (see docs/going-live.md). The app runs on bundled demo data until then.

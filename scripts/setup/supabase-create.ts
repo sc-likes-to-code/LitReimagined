@@ -10,20 +10,31 @@ function setEnv(key: string, value: string) {
   const file = ".env.local";
   const text = readFileSync(file, "utf8");
   const re = new RegExp(`^${key}=.*$`, "m");
-  if (re.test(text)) writeFileSync(file, text.replace(re, () => `${key}=${value}`));
+  if (re.test(text))
+    writeFileSync(
+      file,
+      text.replace(re, () => `${key}=${value}`),
+    );
   else appendFileSync(file, `\n${key}=${value}\n`);
 }
 
 async function main() {
   const { call } = managementApi();
-  const [org] = await call<{ id: string; slug?: string; name: string }[]>("GET", "/organizations");
-  const projects = await call<{ id: string; name: string; status: string }[]>("GET", "/projects");
+  const [org] = await call<{ id: string; slug?: string; name: string }[]>(
+    "GET",
+    "/organizations",
+  );
+  const projects = await call<{ id: string; name: string; status: string }[]>(
+    "GET",
+    "/projects",
+  );
 
   let ref = projects.find((p) => p.name === NAME)?.id;
   if (ref) {
     console.log(`Project "${NAME}" already exists (${ref}); reusing it.`);
   } else {
-    const dbPass = envValue("SUPABASE_DB_PASSWORD") ?? randomBytes(18).toString("base64url");
+    const dbPass =
+      envValue("SUPABASE_DB_PASSWORD") ?? randomBytes(18).toString("base64url");
     setEnv("SUPABASE_DB_PASSWORD", dbPass);
     const created = await call<{ id: string; ref?: string }>("POST", "/projects", {
       name: NAME,

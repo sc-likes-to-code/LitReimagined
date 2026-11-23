@@ -10,7 +10,11 @@ export function managementApi() {
   }
   const base = "https://api.supabase.com/v1";
 
-  async function call<T = unknown>(method: string, path: string, body?: unknown): Promise<T> {
+  async function call<T = unknown>(
+    method: string,
+    path: string,
+    body?: unknown,
+  ): Promise<T> {
     const res = await fetch(`${base}${path}`, {
       method,
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -24,7 +28,9 @@ export function managementApi() {
       /* keep text */
     }
     if (!res.ok) {
-      throw new Error(`${method} ${path} -> ${res.status}: ${typeof json === "string" ? json : JSON.stringify(json)}`);
+      throw new Error(
+        `${method} ${path} -> ${res.status}: ${typeof json === "string" ? json : JSON.stringify(json)}`,
+      );
     }
     return json as T;
   }

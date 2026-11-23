@@ -46,11 +46,13 @@ export function stripBoilerplate(raw: string): string {
 [Copyright 1894 by George Allen.]]" from illustrated editions.
  */
 export function stripIllustrations(text: string): string {
-  return text
-    // A few editions wrap the chapter heading inside the illustration; keep the heading.
-    .replace(/\[Illustration:[^\]]*?\n\s*\n\s*(Chapter\s+[IVXLC]+\.?)\]/gi, "$1")
-    .replace(/\[Illustration:?[\s\S]*?(?:\[_?Copyright[^\]]*\]\]|\])/g, "")
-    .replace(/\[_?Copyright[^\]]*\]\]?/g, "");
+  return (
+    text
+      // A few editions wrap the chapter heading inside the illustration; keep the heading.
+      .replace(/\[Illustration:[^\]]*?\n\s*\n\s*(Chapter\s+[IVXLC]+\.?)\]/gi, "$1")
+      .replace(/\[Illustration:?[\s\S]*?(?:\[_?Copyright[^\]]*\]\]|\])/g, "")
+      .replace(/\[_?Copyright[^\]]*\]\]?/g, "")
+  );
 }
 
 /** Light cleanup of Gutenberg markup into reader-friendly text. */

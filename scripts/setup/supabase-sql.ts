@@ -9,7 +9,9 @@ async function main() {
   const { call } = managementApi();
   const ref = envValue("SUPABASE_PROJECT_REF");
   if (!ref) throw new Error("SUPABASE_PROJECT_REF missing");
-  await call("POST", `/projects/${ref}/database/query`, { query: readFileSync(file, "utf8") });
+  await call("POST", `/projects/${ref}/database/query`, {
+    query: readFileSync(file, "utf8"),
+  });
   console.log(`✓ applied ${file}`);
 }
 

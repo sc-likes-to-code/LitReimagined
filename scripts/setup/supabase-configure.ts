@@ -6,7 +6,11 @@ function setEnv(key: string, value: string) {
   const file = ".env.local";
   const text = readFileSync(file, "utf8");
   const re = new RegExp(`^${key}=.*$`, "m");
-  if (re.test(text)) writeFileSync(file, text.replace(re, () => `${key}=${value}`));
+  if (re.test(text))
+    writeFileSync(
+      file,
+      text.replace(re, () => `${key}=${value}`),
+    );
   else appendFileSync(file, `\n${key}=${value}\n`);
 }
 
@@ -21,7 +25,8 @@ async function main() {
   const keys = await call<ApiKey[]>("GET", `/projects/${ref}/api-keys?reveal=true`);
   const anon = keys.find((k) => k.name === "anon")?.api_key;
   const service = keys.find((k) => k.name === "service_role")?.api_key;
-  if (!anon || !service) throw new Error(`Could not read keys (got: ${keys.map((k) => k.name).join(", ")})`);
+  if (!anon || !service)
+    throw new Error(`Could not read keys (got: ${keys.map((k) => k.name).join(", ")})`);
   setEnv("NEXT_PUBLIC_SUPABASE_URL", `https://${ref}.supabase.co`);
   setEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", anon);
   setEnv("SUPABASE_SERVICE_ROLE_KEY", service);
@@ -39,9 +44,14 @@ async function main() {
   await call("POST", `/projects/${ref}/database/query`, { query: sql });
   console.log("✓ migration applied");
 
-  const check = await call<{ table_name: string }[]>("POST", `/projects/${ref}/database/query`, {
-    query: "select table_name from information_schema.tables where table_schema='public' order by 1",
-  });
+  const check = await call<{ table_name: string }[]>(
+    "POST",
+    `/projects/${ref}/database/query`,
+    {
+      query:
+        "select table_name from information_schema.tables where table_schema='public' order by 1",
+    },
+  );
   console.log("tables:", check.map((t) => t.table_name).join(", "));
 }
 

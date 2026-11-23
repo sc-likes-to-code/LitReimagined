@@ -25,6 +25,15 @@ async function main() {
 
   const { data: books } = await db.from("books").select("id,slug").order("slug");
   for (const b of (books ?? []).filter((x) => !only || x.slug === only)) {
+    // Skip books that already have a glossary, so re-runs never repeat paid calls.
+    const { count } = await db
+      .from("glossary")
+      .select("id", { count: "exact", head: true })
+      .eq("book_id", b.id);
+    if ((count ?? 0) > 0 && !args.has("force")) {
+      console.log(`- ${b.slug}: glossary already built, skipping`);
+      continue;
+    }
     const { data: chs } = await db
       .from("chapters")
       .select("original_paragraphs")

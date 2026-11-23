@@ -17,15 +17,25 @@ async function main() {
   let ok = 0;
   let bad = 0;
 
-  for (const slug of readdirSync(ROOT).filter((d) => statSync(join(ROOT, d)).isDirectory())) {
-    const { data: book } = await db.from("books").select("id").eq("slug", slug).maybeSingle();
+  for (const slug of readdirSync(ROOT).filter((d) =>
+    statSync(join(ROOT, d)).isDirectory(),
+  )) {
+    const { data: book } = await db
+      .from("books")
+      .select("id")
+      .eq("slug", slug)
+      .maybeSingle();
     if (!book) {
       console.warn(`- ${slug}: not in the catalogue, skipping`);
       continue;
     }
-    for (const file of readdirSync(join(ROOT, slug)).filter((f) => /^\d+\.[123]\.json$/.test(f))) {
+    for (const file of readdirSync(join(ROOT, slug)).filter((f) =>
+      /^\d+\.[123]\.json$/.test(f),
+    )) {
       const [chapter, level] = file.split(".");
-      const data = JSON.parse(readFileSync(join(ROOT, slug, file), "utf8")) as { paragraphs: string[] };
+      const data = JSON.parse(readFileSync(join(ROOT, slug, file), "utf8")) as {
+        paragraphs: string[];
+      };
       const { data: ch } = await db
         .from("chapters")
         .select("id,original_paragraphs")
@@ -39,8 +49,13 @@ async function main() {
         continue;
       }
       const original = ch.original_paragraphs as string[];
-      if (data.paragraphs.length !== original.length || data.paragraphs.some((p) => !p?.trim())) {
-        console.error(`✗ ${label}: ${data.paragraphs.length} paragraphs, original has ${original.length}`);
+      if (
+        data.paragraphs.length !== original.length ||
+        data.paragraphs.some((p) => !p?.trim())
+      ) {
+        console.error(
+          `✗ ${label}: ${data.paragraphs.length} paragraphs, original has ${original.length}`,
+        );
         bad++;
         continue;
       }

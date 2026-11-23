@@ -110,7 +110,7 @@ export function CommandPalette() {
           if (e.target === dialogRef.current) close();
         }}
         aria-label="Search and navigate"
-        className="bg-bg-elev text-ink border-line-strong m-auto mt-[15vh] w-[min(92vw,34rem)] rounded-3xl border p-0 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+        className="bg-bg-elev text-ink border-line-strong m-auto mt-[12vh] w-[min(92vw,40rem)] rounded-3xl border p-0 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm"
       >
         <div className="border-line border-b p-4">
           <input
@@ -126,7 +126,7 @@ export function CommandPalette() {
             className="placeholder:text-faint w-full bg-transparent px-2 py-2 text-lg outline-none"
           />
         </div>
-        <ul role="listbox" className="max-h-80 overflow-auto p-2">
+        <ul role="listbox" className="max-h-[min(34rem,68vh)] overflow-auto p-2">
           {results.length === 0 && (
             <li className="text-muted px-4 py-6 text-center text-sm">Nothing found.</li>
           )}

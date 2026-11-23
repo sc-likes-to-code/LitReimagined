@@ -135,6 +135,10 @@ test("the page stays still while search is open and scrolls again after", async 
 
   await page.getByRole("button", { name: /Search/ }).click();
   await expect(page.getByRole("dialog", { name: "Search and navigate" })).toBeVisible();
+  // Every suggestion is visible at once, with nothing to scroll.
+  const list = page.getByRole("listbox");
+  expect(await list.evaluate((el) => el.scrollHeight <= el.clientHeight)).toBe(true);
+  await expect(page.getByRole("option", { name: /Sign in/ })).toBeInViewport();
   const before = await y();
   await page.mouse.wheel(0, 800);
   await page.keyboard.press("PageDown");

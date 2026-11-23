@@ -129,6 +129,91 @@ test.describe.serial("email and password accounts (live Supabase)", () => {
     await expect(page.getByText("Dracula").first()).toBeVisible({ timeout: 20_000 });
   });
 
+  test("reading days sync to the account, survive sign-out and come back", async ({
+    page,
+  }) => {
+    const dayKey = (n: number) => {
+      const d = new Date();
+      d.setDate(d.getDate() - n);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    };
+    const today = dayKey(0);
+    const yesterday = dayKey(1);
+    const cloudDays = async () => {
+      const { data, error } = await admin
+        .from("reading_days")
+        .select("day,words")
+        .eq("user_id", userA);
+      expect(error, "reading_days table should exist").toBeNull();
+      return Object.fromEntries((data ?? []).map((r) => [r.day, r.words]));
+    };
+
+    // Reading done as a guest...
+    await page.goto("/library", { waitUntil: "networkidle" });
+    await page.evaluate(
+      ([t, y]) =>
+        localStorage.setItem("lr:activity:v1", JSON.stringify({ [t]: 400, [y]: 300 })),
+      [today, yesterday],
+    );
+
+    // ...merges into the account at sign-in.
+    await signIn(page, emailA, PASSWORD);
+    await expect(page).toHaveURL(/\/library/, { timeout: 20_000 });
+    await expect.poll(cloudDays, { timeout: 20_000 }).toMatchObject({
+      [today]: 400,
+      [yesterday]: 300,
+    });
+    const rhythm = page.getByRole("region", { name: "Reading rhythm" });
+    await expect(
+      rhythm.getByText("Day streak").locator("..").getByText("2", { exact: true }),
+    ).toBeVisible();
+
+    // Signing out wipes this browser but never the cloud copy.
+    await page.getByRole("button", { name: "Account menu" }).click();
+    await page.getByRole("menuitem", { name: "Sign out" }).click();
+    await expect(page.getByRole("link", { name: "Sign in" }).first()).toBeVisible({
+      timeout: 15_000,
+    });
+    expect(
+      JSON.parse(
+        (await page.evaluate(() => localStorage.getItem("lr:activity:v1"))) ?? "{}",
+      ),
+    ).toEqual({});
+    await page.waitForTimeout(3000);
+    expect(await cloudDays()).toMatchObject({ [today]: 400, [yesterday]: 300 });
+
+    // Signing back in restores the streak from the cloud.
+    await signIn(page, emailA, PASSWORD);
+    await expect(page).toHaveURL(/\/library/, { timeout: 20_000 });
+    await expect(
+      page
+        .getByRole("region", { name: "Reading rhythm" })
+        .getByText("Day streak")
+        .locator("..")
+        .getByText("2", { exact: true }),
+    ).toBeVisible({ timeout: 20_000 });
+  });
+
+  test("reading days are private to their owner", async () => {
+    const asA = createClient(URL!, ANON!, { auth: { persistSession: false } });
+    expect(
+      (await asA.auth.signInWithPassword({ email: emailA, password: PASSWORD })).error,
+    ).toBeNull();
+    const seeded = await admin
+      .from("reading_days")
+      .insert({ user_id: userB, day: "2026-01-02", words: 999 });
+    expect(seeded.error).toBeNull();
+
+    const rows = await asA.from("reading_days").select("user_id");
+    expect(rows.error).toBeNull();
+    expect((rows.data ?? []).every((r) => r.user_id === userA)).toBe(true);
+
+    const forged = await asA
+      .from("reading_days")
+      .insert({ user_id: userB, day: "2026-01-03", words: 1 });
+    expect(forged.error).not.toBeNull();
+  });
+
   test("one account can never read another account's data", async () => {
     // Give user B a private row, then try to read it as user A.
     const { data: book } = await admin

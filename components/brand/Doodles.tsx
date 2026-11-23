@@ -1,7 +1,7 @@
 "use client";
 
 import { m, useReducedMotion } from "motion/react";
-import { fernArt, quillArt } from "@/lib/brand/botanical";
+import { fernArt, quillArt, sprigArt } from "@/lib/brand/botanical";
 import { cn } from "@/lib/utils";
 
 type Props = { className?: string; delay?: number };
@@ -27,7 +27,7 @@ function Draw({
       className={cn("pointer-events-none text-[var(--text-faint)] opacity-60", className)}
       initial={reduce ? false : "hidden"}
       whileInView="shown"
-      viewport={{ once: true, margin: "-15% 0px" }}
+      viewport={{ once: true, margin: "0px 0px -3% 0px" }}
       transition={{ staggerChildren: stagger, delayChildren: delay }}
     >
       {children}
@@ -121,6 +121,220 @@ export function TypewriterDoodle(props: Props) {
       {[0, 1, 2, 3, 4, 5].map((i) => (
         <m.circle key={i} variants={stroke} cx={46 + i * 25} cy={118} r="5" />
       ))}
+    </Draw>
+  );
+}
+
+/* ------------------------------------------------------------------
+   More doodles, each a small scene from a reader's desk
+------------------------------------------------------------------- */
+
+const sprig = sprigArt();
+
+/** A laurel sprig; good as a quiet divider. */
+export function SprigDoodle(props: Props) {
+  return (
+    <Draw viewBox="0 0 260 100" stagger={0.04} {...props}>
+      <m.path variants={stroke} d={sprig.spine} strokeWidth={1.6} />
+      {sprig.leaves.map((d, i) => (
+        <m.path key={i} variants={stroke} d={d} fill="currentColor" fillOpacity={0.05} />
+      ))}
+      {sprig.veins.map((d, i) => (
+        <m.path key={i} variants={fine} d={d} />
+      ))}
+    </Draw>
+  );
+}
+
+/** An inkwell with a quill resting in it. */
+export function InkwellDoodle(props: Props) {
+  return (
+    <Draw viewBox="0 0 200 230" stagger={0.1} {...props}>
+      <m.path
+        variants={stroke}
+        d="M52 124h96c10 0 16 8 14 18l-6 44c-1 8-8 14-16 14H60c-8 0-15-6-16-14l-6-44c-2-10 4-18 14-18Z"
+      />
+      <m.path variants={stroke} d="M76 124v-16h48v16M70 108h60" />
+      <m.path variants={fine} d="M44 152c26 9 86 9 112 0" />
+      <m.path variants={fine} d="M56 148c-2 10-1 22 3 32" />
+      <m.path variants={stroke} d="M112 106 172 12" strokeWidth={1.6} />
+      <m.path
+        variants={stroke}
+        d="M172 12c-26 4-46 28-52 62 26-6 48-26 52-62Z"
+        fill="currentColor"
+        fillOpacity={0.05}
+      />
+      <m.path
+        variants={fine}
+        d="M150 38c-8 6-14 14-20 24M158 28c-4 10-6 20-4 30M140 52c-6 4-10 10-12 16"
+      />
+      <m.path variants={fine} d="M30 214c20 6 120 6 140 0" />
+      <m.path
+        variants={stroke}
+        d="M178 190c-3 4-5 6-5 9a5 5 0 0 0 10 0c0-3-2-5-5-9Z"
+        fill="currentColor"
+        fillOpacity={0.12}
+      />
+    </Draw>
+  );
+}
+
+/** An open book with a few sparks drifting up. */
+export function OpenBookDoodle(props: Props) {
+  return (
+    <Draw viewBox="0 0 240 190" stagger={0.1} {...props}>
+      <m.path variants={stroke} d="M120 56C96 42 58 40 22 48v112c36-8 74-6 98 8Z" />
+      <m.path variants={stroke} d="M120 56c24-14 62-16 98-8v112c-36-8-74-6-98 8Z" />
+      <m.path variants={stroke} d="M120 56v112" />
+      <m.path
+        variants={fine}
+        d="M40 72c22-4 46-2 66 6M40 92c22-4 46-2 66 6M40 112c22-4 46-2 66 6M40 132c14-3 30-2 44 2"
+      />
+      <m.path
+        variants={fine}
+        d="M134 78c20-8 44-10 66-6M134 98c20-8 44-10 66-6M134 118c20-8 44-10 66-6"
+      />
+      <m.path variants={stroke} d="M30 166c30-4 60 0 90 10 30-10 60-14 90-10" />
+      <m.path
+        variants={stroke}
+        d="M120 14c1 6 3 8 9 9-6 1-8 3-9 9-1-6-3-8-9-9 6-1 8-3 9-9ZM170 30c1 4 2 5 6 6-4 1-5 2-6 6-1-4-2-5-6-6 4-1 5-2 6-6ZM76 26c1 4 2 5 6 6-4 1-5 2-6 6-1-4-2-5-6-6 4-1 5-2 6-6Z"
+      />
+      <m.circle variants={fine} cx="148" cy="12" r="1.6" />
+      <m.circle variants={fine} cx="98" cy="10" r="1.6" />
+    </Draw>
+  );
+}
+
+/** A candle burning low, for late-night reading. */
+export function CandleDoodle(props: Props) {
+  return (
+    <Draw viewBox="0 0 120 250" stagger={0.09} {...props}>
+      <m.path variants={stroke} d="M12 226c10 10 86 10 96 0M26 216h68" />
+      <m.path variants={stroke} d="M42 216V116c0-7 36-7 36 0v100" />
+      <m.path variants={fine} d="M42 116c0 7 36 7 36 0" />
+      <m.path variants={fine} d="M52 124c-2 14 3 24 0 36M70 122c2 10-2 16 0 24" />
+      <m.path variants={stroke} d="M60 114v-12" />
+      <m.path
+        variants={stroke}
+        d="M60 102c-15-15-13-38 0-62 13 24 15 47 0 62Z"
+        fill="currentColor"
+        fillOpacity={0.06}
+      />
+      <m.path variants={fine} d="M60 94c-7-8-6-20 0-32 6 12 7 24 0 32Z" />
+      <m.path variants={fine} d="M24 70l-12-4M96 70l12-4M30 42l-9-8M90 42l9-8M60 24V10" />
+    </Draw>
+  );
+}
+
+/** A constellation with a few four-point stars. */
+export function StarsDoodle(props: Props) {
+  const star = (x: number, y: number, r: number) =>
+    `M${x} ${y - r}Q${x} ${y} ${x + r} ${y}Q${x} ${y} ${x} ${y + r}Q${x} ${y} ${x - r} ${y}Q${x} ${y} ${x} ${y - r}Z`;
+  const pts = [
+    [24, 120],
+    [70, 84],
+    [118, 98],
+    [160, 52],
+    [214, 70],
+  ];
+  return (
+    <Draw viewBox="0 0 240 170" stagger={0.08} {...props}>
+      <m.path
+        variants={fine}
+        strokeDasharray="2 5"
+        d={`M${pts.map((p) => p.join(" ")).join("L")}`}
+      />
+      {pts.map(([x, y], i) => (
+        <m.path key={i} variants={stroke} d={star(x, y, i % 2 ? 9 : 12)} />
+      ))}
+      <m.path variants={stroke} d={star(190, 138, 6)} />
+      <m.path variants={stroke} d={star(46, 36, 5)} />
+      <m.circle variants={fine} cx="132" cy="24" r="1.8" />
+      <m.circle variants={fine} cx="96" cy="150" r="1.8" />
+      <m.circle variants={fine} cx="228" cy="116" r="1.8" />
+    </Draw>
+  );
+}
+
+/** Round reading glasses. */
+export function SpectaclesDoodle(props: Props) {
+  return (
+    <Draw viewBox="0 0 250 110" stagger={0.1} {...props}>
+      <m.circle variants={stroke} cx="64" cy="62" r="42" />
+      <m.circle variants={stroke} cx="186" cy="62" r="42" />
+      <m.path variants={stroke} d="M106 54c10-12 28-12 38 0" />
+      <m.path variants={stroke} d="M22 52 6 34M228 52l16-18" />
+      <m.path variants={fine} d="M40 50a26 26 0 0 1 16-14M162 50a26 26 0 0 1 16-14" />
+      <m.path variants={fine} d="M44 66a22 22 0 0 0 6 14M166 66a22 22 0 0 0 6 14" />
+    </Draw>
+  );
+}
+
+/** An old key, for the doors old books open. */
+export function KeyDoodle(props: Props) {
+  return (
+    <Draw viewBox="0 0 230 100" stagger={0.1} {...props}>
+      <m.circle variants={stroke} cx="40" cy="50" r="28" />
+      <m.circle variants={stroke} cx="40" cy="50" r="12" />
+      <m.path variants={fine} d="M40 22v-8M40 78v8M12 50H4M68 50" />
+      <m.path variants={stroke} d="M68 50h150" />
+      <m.path variants={stroke} d="M176 50v22h12V50M200 50v16h12V50" />
+      <m.path variants={fine} d="M96 44h54M96 56h54" />
+    </Draw>
+  );
+}
+
+/** A moth drawn to the lamp, wings patterned like old endpapers. */
+export function MothDoodle(props: Props) {
+  const wing = (
+    <>
+      <m.path
+        variants={stroke}
+        d="M100 72C76 30 30 24 14 54c-8 20 20 44 86 36Z"
+        fill="currentColor"
+        fillOpacity={0.05}
+      />
+      <m.path
+        variants={stroke}
+        d="M100 98C80 98 52 110 48 138c-2 16 20 22 38 8 8-8 12-26 14-48Z"
+        fill="currentColor"
+        fillOpacity={0.05}
+      />
+      <m.circle variants={fine} cx="52" cy="58" r="10" />
+      <m.circle variants={fine} cx="52" cy="58" r="4" />
+      <m.path variants={fine} d="M96 78C72 60 46 76 36 84M92 112c-14 4-30 14-36 26" />
+    </>
+  );
+  return (
+    <Draw viewBox="0 0 200 170" stagger={0.12} {...props}>
+      {wing}
+      <m.g transform="translate(200 0) scale(-1 1)">{wing}</m.g>
+      <m.path
+        variants={stroke}
+        d="M100 52c-3 0-5 3-5 8v70c0 6 3 12 5 14 2-2 5-8 5-14V60c0-5-2-8-5-8Z"
+      />
+      <m.path variants={fine} d="M100 52C92 36 80 28 68 24M100 52c8-16 20-24 32-28" />
+    </Draw>
+  );
+}
+
+/** A stack of books topped with a steaming cup. */
+export function TeaStackDoodle(props: Props) {
+  return (
+    <Draw viewBox="0 0 220 200" stagger={0.1} {...props}>
+      <m.path variants={stroke} d="M24 176h172v20H24Z" />
+      <m.path variants={fine} d="M44 176v20M52 176v20M176 176v20" />
+      <m.path variants={stroke} d="M40 152h150v24H40Z" />
+      <m.path variants={fine} d="M58 152v24M66 152v24M170 152v24" />
+      <m.path variants={stroke} d="M32 130h160v22H32Z" />
+      <m.path variants={fine} d="M50 130v22M58 130v22M168 130v22" />
+      <m.path variants={stroke} d="M78 78h64v18a32 32 0 0 1-64 0Z" />
+      <m.path variants={stroke} d="M142 84c22 0 22 28-2 28" />
+      <m.path variants={stroke} d="M64 130c20 4 72 4 92 0" />
+      <m.path
+        variants={fine}
+        d="M94 62c-8-10 8-16 0-28M112 62c-8-10 8-16 0-28M130 62c-8-10 8-16 0-28"
+      />
     </Draw>
   );
 }

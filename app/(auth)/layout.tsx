@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { KeyDoodle, StarsDoodle } from "@/components/brand/Doodles";
 import { Logo } from "@/components/brand/Logo";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -18,6 +19,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <Link href="/" aria-label="LitReimagined home">
             <Logo />
           </Link>
+          <StarsDoodle className="absolute top-24 right-12 w-44" delay={0.4} />
+          <KeyDoodle className="absolute right-12 bottom-48 w-56" delay={0.8} />
           <figure>
             <blockquote className="font-display max-w-md text-4xl leading-tight italic">
               “I am no bird; and no net ensnares me: I am a free human being with an

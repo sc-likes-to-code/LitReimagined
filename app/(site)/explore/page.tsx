@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { SpectaclesDoodle } from "@/components/brand/Doodles";
 import { RecommendBox } from "@/components/ai/RecommendBox";
 import { ExploreFilters } from "@/components/explore/ExploreFilters";
 import { ExploreResults, ResultsSkeleton } from "@/components/explore/ExploreResults";
@@ -17,7 +18,8 @@ async function Filters() {
 
 export default function ExplorePage({ searchParams }: PageProps<"/explore">) {
   return (
-    <div className="container-page pt-[calc(var(--nav-h)+4rem)]">
+    <div className="container-page relative pt-[calc(var(--nav-h)+4rem)]">
+      <SpectaclesDoodle className="absolute top-[calc(var(--nav-h)+3.5rem)] right-6 hidden w-60 lg:block" />
       <header className="mb-14 max-w-2xl">
         <p className="eyebrow mb-4">The library</p>
         <h1 className="font-display text-5xl tracking-tight sm:text-6xl">

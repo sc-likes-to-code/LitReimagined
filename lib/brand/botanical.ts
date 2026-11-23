@@ -196,3 +196,34 @@ export function quillArt(): QuillArt {
     drop: `M${n(start.x - 5)} ${n(start.y + 25)}a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0Z`,
   };
 }
+
+/* ----------------------------------------------------------------- sprig */
+
+const SPRIG_SPINE: Bezier = [P(6, 66), P(70, 82), P(160, 64), P(254, 16)];
+
+/** A laurel-like branch lying sideways: paired leaves that shrink toward the tip. */
+export function sprigArt() {
+  const leaves: string[] = [];
+  const veins: string[] = [];
+  const pairs = 9;
+  for (let i = 0; i < pairs; i++) {
+    const t = 0.1 + (i / (pairs - 1)) * 0.82;
+    const p = bezierPoint(SPRIG_SPINE, t);
+    const tan = bezierTangent(SPRIG_SPINE, t);
+    const len = 12 + 26 * Math.pow(1 - t, 0.7) + 6;
+    for (const side of [-1, 1] as const) {
+      const a = (48 * Math.PI) / 180;
+      const nx = -tan.y * side;
+      const ny = tan.x * side;
+      const to = P(
+        p.x + (nx * Math.sin(a) + tan.x * Math.cos(a)) * len,
+        p.y + (ny * Math.sin(a) + tan.y * Math.cos(a)) * len,
+      );
+      leaves.push(leafOutline(p, to, len * 0.2, 0.45));
+      veins.push(arc(p, to, side * len * 0.04));
+    }
+  }
+  const tip = bezierPoint(SPRIG_SPINE, 1);
+  leaves.push(leafOutline(P(tip.x - 16, tip.y + 8), P(tip.x + 4, tip.y - 6), 3.4, 0.5));
+  return { spine: bezierPath(SPRIG_SPINE), leaves, veins };
+}

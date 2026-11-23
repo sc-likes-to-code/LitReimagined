@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { InkwellDoodle } from "@/components/brand/Doodles";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Prose } from "@/components/ui/Prose";
 import { siteConfig } from "@/config/site";
@@ -11,7 +12,8 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="container-page pt-[calc(var(--nav-h)+4rem)] pb-8">
+    <div className="container-page relative pt-[calc(var(--nav-h)+4rem)] pb-8">
+      <InkwellDoodle className="absolute top-[calc(var(--nav-h)+3rem)] right-6 hidden w-36 lg:block" />
       <PageHeader
         eyebrow="About"
         title={

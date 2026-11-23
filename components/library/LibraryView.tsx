@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { TeaStackDoodle } from "@/components/brand/Doodles";
 import { BookCover } from "@/components/book/BookCover";
 import { ReadingRhythm } from "@/components/library/ReadingRhythm";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -103,6 +104,7 @@ export function LibraryView({ books }: { books: BookSummary[] }) {
 
       {isEmpty && (
         <div className="border-line grid place-items-center rounded-[2rem] border border-dashed px-6 py-24 text-center">
+          <TeaStackDoodle className="mb-6 w-36" />
           <p className="font-display text-3xl">Your shelf is empty, for now.</p>
           <p className="text-muted mt-3 max-w-sm">
             Start a book, or mark one as &ldquo;want to read&rdquo;, and it will appear

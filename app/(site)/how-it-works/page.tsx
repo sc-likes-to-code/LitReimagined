@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CandleDoodle } from "@/components/brand/Doodles";
 import { SliderDemo } from "@/components/home/SliderDemo";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Prose } from "@/components/ui/Prose";
@@ -16,7 +17,8 @@ export default function HowItWorksPage() {
   const canDemo = Boolean(sample);
 
   return (
-    <div className="container-page pt-[calc(var(--nav-h)+4rem)]">
+    <div className="container-page relative pt-[calc(var(--nav-h)+4rem)]">
+      <CandleDoodle className="absolute top-[calc(var(--nav-h)+3rem)] right-10 hidden h-52 lg:block" />
       <PageHeader
         eyebrow="Transparency"
         title={

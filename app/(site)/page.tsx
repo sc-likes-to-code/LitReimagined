@@ -1,8 +1,15 @@
 import Link from "next/link";
 import {
+  CandleDoodle,
   FernDoodle,
+  InkwellDoodle,
+  MothDoodle,
+  OpenBookDoodle,
   OrbitDoodle,
   QuillDoodle,
+  SpectaclesDoodle,
+  SprigDoodle,
+  StarsDoodle,
   TypewriterDoodle,
 } from "@/components/brand/Doodles";
 import { HeroCovers } from "@/components/home/HeroCovers";
@@ -85,6 +92,10 @@ export default async function Home() {
           className="absolute top-52 right-[5%] hidden w-32 xl:block"
           delay={0.5}
         />
+        <StarsDoodle
+          className="absolute top-28 right-[19%] hidden w-36 2xl:block"
+          delay={0.7}
+        />
         <div className="container-page text-center">
           <p className="eyebrow mb-8">Classic literature · Modern voice</p>
           <h1 className="font-display mx-auto max-w-5xl text-[clamp(2.75rem,8vw,6.5rem)] leading-[0.95] tracking-tight">
@@ -117,6 +128,7 @@ export default async function Home() {
       {canDemo && sample && (
         <section id="try-it" className="container-page relative scroll-mt-28 py-24">
           <TypewriterDoodle className="absolute -bottom-2 left-[2%] hidden w-44 xl:block" />
+          <OpenBookDoodle className="absolute -top-10 right-[2%] hidden w-44 xl:block" />
           <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
             <Reveal>
               <p className="eyebrow mb-4">The signature feature</p>
@@ -142,6 +154,7 @@ export default async function Home() {
 
       {/* FEATURED */}
       <div className="py-16">
+        <SprigDoodle className="mx-auto mb-6 w-56" />
         <Shelf
           eyebrow="Start here"
           title="Today's reimaginings"
@@ -155,6 +168,7 @@ export default async function Home() {
       {/* HOW IT WORKS */}
       <section className="border-line relative overflow-hidden border-y py-24">
         <FernDoodle className="absolute top-8 right-[4%] hidden h-72 xl:block" />
+        <CandleDoodle className="absolute bottom-6 left-[3%] hidden h-48 xl:block" />
         <div className="container-page">
           <Reveal className="mb-14 max-w-xl">
             <p className="eyebrow mb-4">How it works</p>
@@ -192,6 +206,7 @@ export default async function Home() {
 
       {/* FEATURES */}
       <section className="container-page pb-24">
+        <SpectaclesDoodle className="mx-auto mb-10 w-40" />
         <ul className="grid gap-px overflow-hidden rounded-[2rem] border border-[var(--line)] bg-[var(--line)] sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map((f) => (
             <li key={f.title} className="bg-bg-elev p-8">
@@ -227,6 +242,8 @@ export default async function Home() {
                 "radial-gradient(60% 80% at 50% 0%, rgb(255 90 54 / 0.28), transparent), radial-gradient(40% 60% at 90% 100%, rgb(76 201 240 / 0.16), transparent)",
             }}
           />
+          <MothDoodle className="absolute top-8 right-10 hidden w-24 lg:block" />
+          <InkwellDoodle className="absolute bottom-6 left-10 hidden w-24 lg:block" />
           <h2 className="font-display mx-auto max-w-2xl text-4xl tracking-tight sm:text-6xl">
             {all.length} classics are waiting.{" "}
             <em className="text-gradient-ember font-normal">Begin one tonight.</em>

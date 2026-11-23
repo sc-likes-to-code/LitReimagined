@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MothDoodle } from "@/components/brand/Doodles";
 import { Footer } from "@/components/layout/Footer";
 import { Nav } from "@/components/layout/Nav";
 import { ButtonLink } from "@/components/ui/Button";
@@ -12,6 +13,7 @@ export default function NotFound() {
         className="grid min-h-[80dvh] flex-1 place-items-center px-6 pt-24 text-center"
       >
         <div>
+          <MothDoodle className="mx-auto mb-6 w-28" />
           <p className="eyebrow mb-6">Error 404</p>
           <h1 className="font-display text-6xl tracking-tight sm:text-8xl">
             This page has{" "}

@@ -17,7 +17,9 @@
     "content:embed": "tsx scripts/embed.ts",
     "content:status": "tsx scripts/status.ts",
     "content:revalidate": "tsx scripts/revalidate.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "content:dump": "tsx scripts/dump-chapter.ts",
+    "content:import-handwritten": "tsx scripts/import-handwritten.ts"
   },
   "dependencies": {
     "@google/genai": "^3.6.1",

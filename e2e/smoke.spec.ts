@@ -86,8 +86,22 @@ test("a book can be added to the shelf and appears in the library", async ({ pag
   await expect(page.getByText("Dracula").first()).toBeVisible();
 });
 
-test("live AI works in demo mode and shows the quill panel", async ({ page }) => {
-  await page.goto("/read/pride-and-prejudice/1");
+test("the quill panel shows an explanation (AI response mocked, so no quota is used)", async ({
+  page,
+}) => {
+  await page.route("**/api/ai/explain", (route) =>
+    route.fulfill({
+      json: {
+        ok: true,
+        output: { meaning: "A mocked plain-English reading.", note: "A mocked note." },
+        cached: false,
+        demo: false,
+        remaining: 2,
+        limit: 3,
+      },
+    }),
+  );
+  await page.goto("/read/pride-and-prejudice/1", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "Original", exact: true }).click();
   await page.evaluate(() => {
     const p = document.querySelector('[data-p="1"]')!;
@@ -99,8 +113,10 @@ test("live AI works in demo mode and shows the quill panel", async ({ page }) =>
   });
   await page.getByRole("button", { name: "Explain" }).click();
   await expect(page.getByRole("dialog", { name: "The quill" })).toContainText(
-    "demo explanation",
-    { timeout: 15_000 },
+    "A mocked plain-English reading.",
+    {
+      timeout: 15_000,
+    },
   );
 });
 

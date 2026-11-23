@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { AccountButton } from "@/components/layout/AccountButton";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { siteConfig } from "@/config/site";
 
@@ -31,12 +32,7 @@ export function Nav() {
         <div className="flex items-center gap-2">
           <CommandPalette />
           <ThemeToggle />
-          <Link
-            href="/login"
-            className="bg-ink text-bg hidden rounded-full px-5 py-2.5 text-sm font-medium transition-transform hover:-translate-y-0.5 sm:inline-block"
-          >
-            Sign in
-          </Link>
+          <AccountButton />
         </div>
       </nav>
     </header>

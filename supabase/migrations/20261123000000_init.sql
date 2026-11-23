@@ -136,9 +136,7 @@ create table public.highlights (
   book_id uuid not null references public.books(id) on delete cascade,
   chapter_idx int not null,
   paragraph_idx int not null,
-  start_offset int not null,
-  end_offset int not null,
-  source text not null default 'modern' check (source in ('original', 'modern')),
+  quote text not null,
   color text not null default 'ember',
   note text,
   created_at timestamptz not null default now()

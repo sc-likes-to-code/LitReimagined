@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter, Newsreader } from "next/font/google";
 import "./globals.css";
+import { SyncProvider } from "@/components/layout/SyncProvider";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { publicEnv } from "@/lib/env";
 import { siteConfig } from "@/config/site";
@@ -72,6 +73,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <SmoothScroll />
+        <SyncProvider />
         {children}
       </body>
     </html>

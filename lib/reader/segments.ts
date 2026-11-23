@@ -3,12 +3,18 @@
  * terms). Highlights win over glossary terms when they overlap.
  */
 export type Mark =
-  | { kind: "highlight"; start: number; end: number; id: string; color: string; hasNote: boolean }
+  | {
+      kind: "highlight";
+      start: number;
+      end: number;
+      id: string;
+      color: string;
+      hasNote: boolean;
+    }
   | { kind: "gloss"; start: number; end: number; term: string };
 
 export type Segment =
-  | { type: "text"; text: string }
-  | { type: "mark"; text: string; mark: Mark };
+  { type: "text"; text: string } | { type: "mark"; text: string; mark: Mark };
 
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -17,7 +23,10 @@ export function findGlossMarks(text: string, terms: string[]): Mark[] {
   const marks: Mark[] = [];
   const sorted = [...new Set(terms)].filter(Boolean).sort((a, b) => b.length - a.length);
   for (const term of sorted) {
-    const re = new RegExp(String.raw`(?<![\p{L}\p{N}])${escapeRe(term)}(?![\p{L}\p{N}])`, "giu");
+    const re = new RegExp(
+      String.raw`(?<![\p{L}\p{N}])${escapeRe(term)}(?![\p{L}\p{N}])`,
+      "giu",
+    );
     for (const m of text.matchAll(re)) {
       marks.push({ kind: "gloss", start: m.index!, end: m.index! + m[0].length, term });
     }
@@ -33,7 +42,14 @@ export function findHighlightMark(
   if (!h.text) return null;
   const i = text.indexOf(h.text);
   if (i < 0) return null;
-  return { kind: "highlight", start: i, end: i + h.text.length, id: h.id, color: h.color, hasNote: Boolean(h.note) };
+  return {
+    kind: "highlight",
+    start: i,
+    end: i + h.text.length,
+    id: h.id,
+    color: h.color,
+    hasNote: Boolean(h.note),
+  };
 }
 
 export function buildSegments(text: string, marks: Mark[]): Segment[] {

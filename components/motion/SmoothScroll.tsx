@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Lenis from "lenis";
+import { setSmoothScroller } from "@/lib/client/smooth-scroll";
 
 /** Lenis smooth scrolling on its own animation frame loop. Disabled for reduced motion. */
 export function SmoothScroll() {
@@ -9,6 +10,7 @@ export function SmoothScroll() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 0.95 });
+    setSmoothScroller(lenis);
     let raf = 0;
     const tick = (time: number) => {
       lenis.raf(time);
@@ -18,6 +20,7 @@ export function SmoothScroll() {
 
     return () => {
       cancelAnimationFrame(raf);
+      setSmoothScroller(null);
       lenis.destroy();
     };
   }, []);

@@ -62,6 +62,38 @@ test("the modernization slider changes the text on the home page", async ({ page
   await expect(demo).toContainText("Everybody knows a rich, single guy");
 });
 
+test("'Try the slider' scrolls to the demo every time, not just the first", async ({
+  page,
+  isMobile,
+}) => {
+  test.setTimeout(120_000);
+  await page.goto("/", { waitUntil: "networkidle" });
+  for (let i = 0; i < 3; i++) {
+    if (!isMobile) {
+      await page.mouse.move(600, 400);
+      await page.mouse.wheel(0, -8000);
+    } else await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(1200);
+    await page.getByRole("link", { name: "Try the slider" }).click();
+    await expect
+      .poll(
+        () =>
+          page
+            .locator("#try-it")
+            .evaluate((el) => Math.round(el.getBoundingClientRect().top)),
+        {
+          timeout: 8000,
+        },
+      )
+      .toBeLessThan(200);
+    await expect
+      .poll(() =>
+        page.locator("#try-it").evaluate((el) => el.getBoundingClientRect().top),
+      )
+      .toBeGreaterThan(0);
+  }
+});
+
 test("explore filters update the URL and the results", async ({ page }) => {
   await page.goto("/explore", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "Gothic", exact: true }).first().click();

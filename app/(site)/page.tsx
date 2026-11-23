@@ -9,7 +9,8 @@ import { HeroCovers } from "@/components/home/HeroCovers";
 import { Shelf } from "@/components/home/Shelf";
 import { SliderDemo } from "@/components/home/SliderDemo";
 import { Reveal } from "@/components/motion/Reveal";
-import { ButtonLink } from "@/components/ui/Button";
+import { ButtonLink, buttonClasses } from "@/components/ui/Button";
+import { HashLink } from "@/components/ui/HashLink";
 import { demoContent } from "@/data/demo/content";
 import { repo } from "@/lib/data";
 
@@ -99,9 +100,12 @@ export default async function Home() {
             <ButtonLink href="/explore" size="lg">
               Start reading
             </ButtonLink>
-            <ButtonLink href="#try-it" variant="secondary" size="lg">
+            <HashLink
+              href="#try-it"
+              className={buttonClasses({ variant: "secondary", size: "lg" })}
+            >
               Try the slider
-            </ButtonLink>
+            </HashLink>
           </div>
         </div>
         <div className="mt-16 sm:mt-20">

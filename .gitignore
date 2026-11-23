@@ -1,0 +1,41 @@
+# Old pre-rebuild designs and assets (kept locally only)
+/_legacy/
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Env / secrets (never commit real keys)
+.env
+.env.local
+.env.*.local
+
+# Build / misc
+build/
+dist/
+coverage/
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
+
+# Vercel / Supabase local
+.vercel/
+supabase/.temp/
+supabase/.branches/
+
+# Editor
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Generated AI batch output (large; lives in the database)
+/scripts/.cache/
+/data/raw/

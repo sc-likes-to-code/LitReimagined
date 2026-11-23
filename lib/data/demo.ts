@@ -13,7 +13,7 @@ const books: BookSummary[] = demoBookRows.map(({ authorSlug, book }) => {
 });
 const bookBySlug = new Map(books.map((b) => [b.slug, b]));
 
-const collectionDefs = [
+export const demoCollectionDefs = [
   {
     slug: "dark-and-gothic",
     title: "Dark & Gothic",
@@ -117,7 +117,7 @@ export const demoRepository: Repository = {
   },
 
   async listCollections(): Promise<Collection[]> {
-    return collectionDefs.map((c) => ({
+    return demoCollectionDefs.map((c) => ({
       slug: c.slug,
       title: c.title,
       description: c.description,
@@ -126,7 +126,7 @@ export const demoRepository: Repository = {
   },
 
   async getCollection(slug) {
-    const c = collectionDefs.find((x) => x.slug === slug);
+    const c = demoCollectionDefs.find((x) => x.slug === slug);
     if (!c) return null;
     return {
       slug: c.slug,

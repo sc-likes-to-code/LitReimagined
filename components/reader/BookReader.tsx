@@ -301,6 +301,8 @@ function BookView({
   const [index, setIndex] = useState(() => viewForPara(views, initialPara));
   const [side, setSide] = useState<"orig" | "modern">("modern");
   const [hover, setHover] = useState<Zone>(null);
+  /** The page turn in progress: its direction and the view it started from. */
+  const [flip, setFlip] = useState<{ dir: 1 | -1; from: number } | null>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
   const counted = useRef(new Set<string>());
   const view = views[index] ?? views[0];
@@ -323,6 +325,7 @@ function BookView({
         }
         return;
       }
+      setFlip({ dir: delta, from: index });
       setIndex(next);
       onAnchor(views[next].first);
     },
@@ -412,11 +415,13 @@ function BookView({
   };
 
   const makePage = (
+    vi: number,
     pieces: Piece[],
     position: "left" | "right" | "single",
     head: ReactNode,
     number: number | null,
     title: ReactNode,
+    live = true,
   ) => (
     <BookPage
       pieces={pieces}
@@ -425,13 +430,37 @@ function BookView({
       position={position}
       head={head}
       number={number}
-      title={index === 0 ? title : null}
-      hover={hover}
-      onMove={(e) => setHover(zoneOf(e, position))}
-      onLeave={() => setHover(null)}
-      onClick={(e) => onPageClick(e, position)}
+      title={vi === 0 ? title : null}
+      hover={live ? hover : null}
+      onMove={(e) => live && setHover(zoneOf(e, position))}
+      onLeave={() => live && setHover(null)}
+      onClick={(e) => live && onPageClick(e, position)}
     />
   );
+
+  /** One page of the open spread `vi`, as it is printed. */
+  const spreadPage = (vi: number, position: "left" | "right", live = true) => {
+    const v = views[vi];
+    const left = position === "left";
+    const head = left
+      ? aligned
+        ? origLabel
+        : <span className="eyebrow">{book.title}</span>
+      : v.pages[1] || aligned
+        ? aligned
+          ? modernLabel
+          : <span className="eyebrow">{chapter.title}</span>
+        : null;
+    return makePage(
+      vi,
+      v.pages[left ? 0 : 1] ?? [],
+      position,
+      head,
+      left ? pageNo(vi * 2 + 1) : v.pages[1] ? pageNo(vi * 2 + 2) : null,
+      left ? titleBlock(false) : aligned ? titleBlock(true) : null,
+      live,
+    );
+  };
 
   const titleBlock = (right: boolean) => (
     <div
@@ -491,30 +520,51 @@ function BookView({
     ) : (
       <span className="eyebrow">{book.title}</span>
     );
-    body = makePage(pieces, "single", head, pageNo(index + 1), titleBlock(false));
+    body = (
+      <div
+        key={index}
+        className={flip ? (flip.dir > 0 ? "turn-next" : "turn-prev") : undefined}
+        onAnimationEnd={() => setFlip(null)}
+      >
+        {makePage(index, pieces, "single", head, pageNo(index + 1), titleBlock(false))}
+      </div>
+    );
   } else {
-    const leftHead = aligned ? origLabel : <span className="eyebrow">{book.title}</span>;
-    const rightHead = aligned ? (
-      modernLabel
-    ) : (
-      <span className="eyebrow">{chapter.title}</span>
+    // While a leaf is turning, each half still shows what is under it.
+    const leftIdx = flip && flip.dir > 0 ? flip.from : index;
+    const rightIdx = flip && flip.dir < 0 ? flip.from : index;
+    const leaf = flip && views[flip.from] && (
+      <div
+        key={`${flip.from}-${index}`}
+        aria-hidden
+        className={cn("book-leaf", flip.dir > 0 ? "book-leaf-next" : "book-leaf-prev")}
+        style={{ width: geometry.pageW, height: geometry.pageH }}
+        onAnimationEnd={(e) => {
+          if (e.target === e.currentTarget) setFlip(null);
+        }}
+      >
+        <div className="book-leaf-face">
+          {spreadPage(flip.from, flip.dir > 0 ? "right" : "left", false)}
+          <span className="book-leaf-shade" />
+        </div>
+        <div className="book-leaf-face book-leaf-back">
+          {spreadPage(index, flip.dir > 0 ? "left" : "right", false)}
+          <span className="book-leaf-shade" />
+        </div>
+      </div>
     );
     body = (
-      <div className="flex" style={{ width: geometry.pageW * 2, height: geometry.pageH }}>
-        {makePage(
-          view.pages[0],
-          "left",
-          leftHead,
-          pageNo(index * 2 + 1),
-          titleBlock(false),
-        )}
-        {makePage(
-          view.pages[1] ?? [],
-          "right",
-          view.pages[1] || aligned ? rightHead : null,
-          view.pages[1] ? pageNo(index * 2 + 2) : null,
-          aligned ? titleBlock(true) : null,
-        )}
+      <div
+        className="relative flex"
+        style={{
+          width: geometry.pageW * 2,
+          height: geometry.pageH,
+          perspective: geometry.pageW * 6,
+        }}
+      >
+        {spreadPage(leftIdx, "left")}
+        {spreadPage(rightIdx, "right")}
+        {leaf}
       </div>
     );
   }

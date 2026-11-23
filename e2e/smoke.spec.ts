@@ -383,8 +383,13 @@ test.describe("book view", () => {
 
     await page.keyboard.press("ArrowRight");
     expect((await pageStatus(page)).text).toMatch(/Pages 3–4 of/);
+    // A leaf turns over the spine, then the finished spread stands alone.
+    await expect(page.locator(".book-leaf-next")).toHaveCount(1);
+    await expect(page.locator(".book-leaf")).toHaveCount(0);
     await page.keyboard.press("ArrowLeft");
     expect((await pageStatus(page)).text).toMatch(/Pages 1–2 of/);
+    await expect(page.locator(".book-leaf-prev")).toHaveCount(1);
+    await expect(page.locator(".book-leaf")).toHaveCount(0);
 
     // Clicking the outer edge of the right page turns forward; the left edge of the left page, back.
     const pages = page.locator(".book-page");
@@ -448,8 +453,11 @@ test.describe("book view", () => {
         ).toBe(true);
         // Left page on desktop; the single page (original side) on mobile.
         seen.push(...pagesNow[0].text);
-        if (i < turns - 1) await page.keyboard.press("ArrowRight");
-        if (isMobile && i < turns - 1) await page.waitForTimeout(0);
+        if (i < turns - 1) {
+          await page.keyboard.press("ArrowRight");
+          // Let the page finish turning so only the open pages are in the document.
+          await expect(page.locator(".book-leaf")).toHaveCount(0);
+        }
       }
       // On mobile the single page defaults to the modern text, so only compare originals on desktop.
       if (!isMobile) {

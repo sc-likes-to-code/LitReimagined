@@ -348,6 +348,82 @@ body::after {
 .book-page-single {
   border-radius: 14px;
 }
+/* A turning leaf: pivots on the spine, old page on the front, new page on the back. */
+.book-leaf {
+  position: absolute;
+  top: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+  animation-duration: 0.7s;
+  animation-timing-function: cubic-bezier(0.45, 0.05, 0.25, 1);
+  animation-fill-mode: forwards;
+  will-change: transform;
+}
+.book-leaf-next {
+  left: 50%;
+  transform-origin: left center;
+  animation-name: leaf-next;
+}
+.book-leaf-prev {
+  left: 0;
+  transform-origin: right center;
+  animation-name: leaf-prev;
+}
+.book-leaf-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.book-leaf-back {
+  transform: rotateY(180deg);
+}
+.book-leaf-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgb(var(--shadow-color) / 0.5);
+  opacity: 0;
+  animation: leaf-shade 0.7s ease-in-out forwards;
+}
+@keyframes leaf-next {
+  to {
+    transform: rotateY(-180deg);
+  }
+}
+@keyframes leaf-prev {
+  to {
+    transform: rotateY(180deg);
+  }
+}
+@keyframes leaf-shade {
+  50% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+/* Phones turn one page at a time: the new page slides in. */
+@keyframes turn-from-right {
+  from {
+    opacity: 0.2;
+    transform: translateX(28px);
+  }
+}
+@keyframes turn-from-left {
+  from {
+    opacity: 0.2;
+    transform: translateX(-28px);
+  }
+}
+.turn-next {
+  animation: turn-from-right 0.28s var(--ease-signature) both;
+}
+.turn-prev {
+  animation: turn-from-left 0.28s var(--ease-signature) both;
+}
+
 .book-edge {
   position: absolute;
   top: 50%;

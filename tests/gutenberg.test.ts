@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BOOK_SOURCES, type BookSource } from "../scripts/config/books";
-import { cleanTitle, parseChapters, romanToInt, stripBoilerplate } from "../scripts/lib/gutenberg";
+import { cleanTitle, parseChapters, romanToInt, stripBoilerplate, stripIllustrations } from "../scripts/lib/gutenberg";
 
 const lorem = (n: number) => Array.from({ length: n }, (_, i) => `word${i}`).join(" ");
 const wrap = (body: string) =>
@@ -13,6 +13,24 @@ describe("gutenberg parser", () => {
 
   it("strips the licence header and footer", () => {
     expect(stripBoilerplate(wrap("Body text")).trim()).toBe("Body text");
+  });
+
+  it("removes multi-paragraph illustration blocks but keeps a chapter heading inside one", () => {
+    const text = [
+      "Before.",
+      "[Illustration:",
+      "“He came down to see the place”",
+      "[Copyright 1894 by George Allen.]]",
+      "After. [Illustration: Mr. & Mrs. Bennet] Done.",
+      "[Illustration: ·PRIDE AND PREJUDICE·",
+      "Chapter I.]",
+      "Body.",
+    ].join("\n\n");
+    const out = stripIllustrations(text);
+    expect(out).not.toMatch(/Illustration|Copyright|came down|PRIDE/);
+    expect(out).toContain("Before.");
+    expect(out).toContain("Done.");
+    expect(out).toMatch(/Chapter I\./);
   });
 
   it("tames shouting titles but leaves normal ones", () => {

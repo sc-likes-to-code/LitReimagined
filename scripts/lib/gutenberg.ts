@@ -37,6 +37,22 @@ export function stripBoilerplate(raw: string): string {
   return text.slice(from, to);
 }
 
+/**
+ * Removes illustration placeholders, including multi-paragraph ones such as
+ * "[Illustration:
+
+“Caption”
+
+[Copyright 1894 by George Allen.]]" from illustrated editions.
+ */
+export function stripIllustrations(text: string): string {
+  return text
+    // A few editions wrap the chapter heading inside the illustration; keep the heading.
+    .replace(/\[Illustration:[^\]]*?\n\s*\n\s*(Chapter\s+[IVXLC]+\.?)\]/gi, "$1")
+    .replace(/\[Illustration:?[\s\S]*?(?:\[_?Copyright[^\]]*\]\]|\])/g, "")
+    .replace(/\[_?Copyright[^\]]*\]\]?/g, "");
+}
+
 /** Light cleanup of Gutenberg markup into reader-friendly text. */
 export function cleanParagraph(p: string): string {
   return p
@@ -52,7 +68,13 @@ export function splitParagraphs(block: string): string[] {
   return block
     .split(/\n\s*\n/)
     .map(cleanParagraph)
-    .filter((p) => p.length > 0 && !/^[IVXLC]{1,6}\.?$/.test(p));
+    .filter(
+      (p) =>
+        p.length > 0 &&
+        !/^[IVXLC]{1,6}\.?$/.test(p) &&
+        // Publisher advertisements and stray brackets left by scanned editions.
+        !/Popular Copyrighted Fiction|^\]$/.test(p),
+    );
 }
 
 const words = (paras: string[]) => paras.join(" ").split(/\s+/).filter(Boolean).length;
@@ -82,7 +104,7 @@ export function cleanTitle(t: string): string {
 
 /** Splits a book into chapters using the per-book heading rules. */
 export function parseChapters(raw: string, src: BookSource): ParsedChapter[] {
-  let text = stripBoilerplate(raw);
+  let text = stripIllustrations(stripBoilerplate(raw));
 
   if (src.startAfter) {
     const re = new RegExp(

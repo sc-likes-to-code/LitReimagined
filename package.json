@@ -16,7 +16,8 @@
     "content:glossary": "tsx scripts/glossary.ts",
     "content:embed": "tsx scripts/embed.ts",
     "content:status": "tsx scripts/status.ts",
-    "content:revalidate": "tsx scripts/revalidate.ts"
+    "content:revalidate": "tsx scripts/revalidate.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@google/genai": "^3.6.1",
@@ -34,6 +35,8 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^24.19.2",
     "@types/react": "^19",

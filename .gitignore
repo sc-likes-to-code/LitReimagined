@@ -55,3 +55,7 @@ GEMINI.md
 
 # Tooling output
 .playwright-mcp/
+
+# Playwright
+/test-results/
+/playwright-report/

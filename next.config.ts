@@ -29,6 +29,8 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  // The dev-only corner badge overlaps the reader's controls on small screens.
+  devIndicators: false,
   turbopack: {
     rules: {
       "*.css": {

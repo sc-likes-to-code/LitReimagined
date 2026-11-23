@@ -254,3 +254,12 @@ test("read aloud speaks paragraph by paragraph and can be paused and stopped", a
   await expect(bar).toBeHidden();
   await expect(page.locator('[data-speaking="true"]')).toHaveCount(0);
 });
+
+test("side-by-side view labels each column with its version", async ({ page, isMobile }) => {
+  test.skip(isMobile, "The sticky column header is a desktop layout.");
+  await page.goto("/read/alices-adventures-in-wonderland/1", { waitUntil: "networkidle" });
+  await page.keyboard.press("s");
+  const header = page.locator("div[aria-hidden='true']", { hasText: "Original version" }).first();
+  await expect(header).toContainText("Original version");
+  await expect(header).toContainText("Modern version");
+});

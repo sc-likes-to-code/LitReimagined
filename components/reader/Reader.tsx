@@ -23,7 +23,7 @@ import {
   useReaderPrefs,
   type HighlightColor,
 } from "@/lib/client/library";
-import type { Chapter, ChapterSummary, Level } from "@/lib/data/types";
+import { LEVEL_LABELS, type Chapter, type ChapterSummary, type Level } from "@/lib/data/types";
 import { useReadAloud } from "@/lib/client/read-aloud";
 import { cn } from "@/lib/utils";
 
@@ -368,6 +368,15 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
           style={bodyStyle}
           className={cn("space-y-[1.4em]", split && "space-y-[1.8em]")}
         >
+          {split && (
+            <div
+              aria-hidden
+              className="bg-bg/85 sticky top-[var(--nav-h)] z-30 -mx-2 hidden grid-cols-2 gap-x-12 px-2 py-3 backdrop-blur md:grid"
+            >
+              <p className="eyebrow label-original">{LEVEL_LABELS[0]} version</p>
+              <p className="eyebrow label-modern">{LEVEL_LABELS[modernLevel]} version</p>
+            </div>
+          )}
           {chapter.original.map((orig, i) => {
             const showOriginal = split || level === 0 || !hasModern;
             const showModern = split || (level !== 0 && hasModern);
@@ -393,7 +402,11 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
               >
                 {showOriginal && (
                   <div className={cn(split && "md:order-1")}>
-                    {split && <p className="eyebrow mb-2 md:hidden">Original</p>}
+                    {split && (
+                      <p className="eyebrow label-original mb-2 md:hidden">
+                        {LEVEL_LABELS[0]} version
+                      </p>
+                    )}
                     <Paragraph
                       {...common}
                       text={orig}
@@ -405,7 +418,11 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
                 )}
                 {showModern && (
                   <div className={cn(split && "md:order-2")}>
-                    {split && <p className="eyebrow mb-2 md:hidden">Modern</p>}
+                    {split && (
+                      <p className="eyebrow label-modern mb-2 md:hidden">
+                        {LEVEL_LABELS[modernLevel]} version
+                      </p>
+                    )}
                     <Paragraph
                       {...common}
                       text={modernText[i] ?? orig}

@@ -52,3 +52,6 @@ GEMINI.md
 .cursor/
 .cursorrules
 .github/copilot-instructions.md
+
+# Tooling output
+.playwright-mcp/

@@ -28,7 +28,7 @@ Everything below is done **once**, in this order. The app works in demo mode unt
 
 1. Create a key at <https://aistudio.google.com/apikey> and set `GEMINI_API_KEY` in `.env.local`.
 2. Check your current free-tier limits in AI Studio. Set `GEMINI_BATCH_RPM` and `GEMINI_BATCH_RPD` (pipeline throttle) and, if you like, `AI_DAILY_LIMIT_ANON`, `AI_DAILY_LIMIT_USER` and `AI_GLOBAL_DAILY_CEILING` (live features).
-3. If a model name has changed, set `GEMINI_MODEL_LIVE`, `GEMINI_MODEL_BATCH` and `GEMINI_MODEL_EMBED`. Defaults live in `config/ai.ts`.
+3. If a model name has changed, set `GEMINI_MODEL_LIVE`, `GEMINI_MODEL_BATCH` and `GEMINI_MODEL_EMBED`. Defaults (currently `gemini-3.1-flash-lite` for text and `gemini-embedding-001` for embeddings) live in `config/ai.ts`.
 
 ## 4. Fill the library
 

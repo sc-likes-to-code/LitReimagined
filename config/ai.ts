@@ -28,8 +28,8 @@ export const MAX_QUERY_CHARS = 200;
 export function getModels() {
   const env = getServerEnv();
   return {
-    live: env.geminiModelLive ?? "gemini-2.5-flash-lite",
-    batch: env.geminiModelBatch ?? "gemini-2.5-flash-lite",
+    live: env.geminiModelLive ?? "gemini-3.1-flash-lite",
+    batch: env.geminiModelBatch ?? "gemini-3.1-flash-lite",
     embed: env.geminiModelEmbed ?? "gemini-embedding-001",
     embedDimensions: 768,
   };

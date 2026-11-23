@@ -8,7 +8,7 @@ export class BudgetExhausted extends Error {
   }
 }
 
-const batchModel = () => envValue("GEMINI_MODEL_BATCH") ?? "gemini-2.5-flash-lite";
+const batchModel = () => envValue("GEMINI_MODEL_BATCH") ?? "gemini-3.1-flash-lite";
 const embedModel = () => envValue("GEMINI_MODEL_EMBED") ?? "gemini-embedding-001";
 
 let client: GoogleGenAI | null = null;

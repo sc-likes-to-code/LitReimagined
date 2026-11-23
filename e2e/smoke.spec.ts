@@ -143,3 +143,114 @@ test.describe("accessibility", () => {
     });
   }
 });
+
+test("a selected passage becomes a downloadable quote card", async ({ page, isMobile }) => {
+  test.skip(isMobile, "Download checks run on desktop.");
+  await page.goto("/read/pride-and-prejudice/1", { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "Original", exact: true }).click();
+  await page.evaluate(() => {
+    const p = document.querySelector('[data-p="1"]')!;
+    const r = document.createRange();
+    r.selectNodeContents(p);
+    const s = window.getSelection()!;
+    s.removeAllRanges();
+    s.addRange(r);
+  });
+  await page.getByRole("button", { name: "Card", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Make a quote card" });
+  await expect(dialog).toBeVisible();
+
+  // The canvas is really painted (not blank) and changes size with the shape.
+  const size = () =>
+    dialog.locator("canvas").evaluate((c: HTMLCanvasElement) => [c.width, c.height]);
+  expect(await size()).toEqual([1080, 1350]);
+  await dialog.getByRole("button", { name: "Story" }).click();
+  await expect.poll(size).toEqual([1080, 1920]);
+  await dialog.getByRole("button", { name: "Paper" }).click();
+  const painted = await dialog.locator("canvas").evaluate((c: HTMLCanvasElement) => {
+    const d = c.getContext("2d")!.getImageData(0, 0, c.width, c.height).data;
+    const seen = new Set<number>();
+    for (let i = 0; i < d.length; i += 4 * 997) seen.add((d[i] << 16) | (d[i + 1] << 8) | d[i + 2]);
+    return seen.size;
+  });
+  expect(painted).toBeGreaterThan(20);
+
+  const download = page.waitForEvent("download");
+  await dialog.getByRole("button", { name: "Download image" }).click();
+  expect((await download).suggestedFilename()).toMatch(/pride-and-prejudice-quote\.png$/);
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+});
+
+test("read aloud speaks paragraph by paragraph and can be paused and stopped", async ({
+  page,
+}) => {
+  // A fake speech engine, so the test is silent and does not depend on installed voices.
+  await page.addInitScript(() => {
+    const spoken: string[] = [];
+    (window as unknown as { __spoken: string[] }).__spoken = spoken;
+    class FakeUtterance {
+      text: string;
+      rate = 1;
+      lang = "";
+      voice: unknown = null;
+      onstart: (() => void) | null = null;
+      onend: (() => void) | null = null;
+      onerror: ((e: { error: string }) => void) | null = null;
+      constructor(text: string) {
+        this.text = text;
+      }
+    }
+    let queue: FakeUtterance[] = [];
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const pump = () => {
+      const u = queue.shift();
+      if (!u) return;
+      spoken.push(u.text);
+      u.onstart?.();
+      timer = setTimeout(() => {
+        u.onend?.();
+        pump();
+      }, 150);
+    };
+    Object.defineProperty(window, "SpeechSynthesisUtterance", { value: FakeUtterance });
+    Object.defineProperty(window, "speechSynthesis", {
+      value: {
+        getVoices: () => [],
+        speak: (u: FakeUtterance) => {
+          queue.push(u);
+          if (queue.length === 1 && !timer) pump();
+        },
+        cancel: () => {
+          queue = [];
+          clearTimeout(timer);
+          timer = undefined;
+        },
+      },
+    });
+  });
+
+  await page.goto("/read/alices-adventures-in-wonderland/1", { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "Read aloud" }).click();
+  const bar = page.getByRole("region", { name: "Read aloud" });
+  await expect(bar).toBeVisible();
+  await expect(page.locator('[data-speaking="true"]')).toHaveCount(1);
+
+  // It advances on its own.
+  const first = await page.locator("[data-speaking='true']").getAttribute("data-p");
+  await expect
+    .poll(() => page.locator("[data-speaking='true']").getAttribute("data-p"))
+    .not.toBe(first);
+
+  await bar.getByRole("button", { name: "Pause reading" }).click();
+  await expect(bar.getByRole("button", { name: "Resume reading" })).toBeVisible();
+  await bar.getByRole("button", { name: /Speed/ }).click();
+  await expect(bar.getByRole("button", { name: /Speed 1.25x/ })).toBeVisible();
+  await bar.getByRole("button", { name: "Resume reading" }).click();
+  await expect(bar.getByRole("button", { name: "Pause reading" })).toBeVisible();
+
+  await bar.getByRole("button", { name: "Stop reading" }).click();
+  await expect(bar).toBeHidden();
+  await expect(page.locator('[data-speaking="true"]')).toHaveCount(0);
+});

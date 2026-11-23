@@ -21,6 +21,8 @@ type Props = {
   bookmarked: boolean;
   active: boolean;
   focus: boolean;
+  /** True while read-aloud is speaking this paragraph. */
+  speaking?: boolean;
   onGloss: (term: string, el: HTMLElement) => void;
   onHighlight: (id: string, el: HTMLElement) => void;
   onBookmark: () => void;
@@ -44,6 +46,7 @@ export function Paragraph({
   bookmarked,
   active,
   focus,
+  speaking,
   onGloss,
   onHighlight,
   onBookmark,
@@ -98,8 +101,10 @@ export function Paragraph({
         className={cn(
           "morph-in whitespace-pre-line transition-opacity duration-500",
           family === "serif" ? "font-reading" : "font-sans",
-          focus && !active && "opacity-35",
+          focus && !active && !speaking && "opacity-35",
+          speaking && "bg-ember/10 -mx-3 rounded-lg px-3 py-1",
         )}
+        data-speaking={speaking ? "true" : undefined}
       >
         {segments.map((s, i) => {
           if (s.type === "text") return <Fragment key={i}>{s.text}</Fragment>;

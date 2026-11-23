@@ -15,11 +15,12 @@ type Props = {
   onHighlight: (color: HighlightColor) => void;
   onCopy: () => void;
   onAi?: (kind: "rewrite" | "explain") => void;
+  onCard?: () => void;
 };
 
-export function SelectionToolbar({ selection, onHighlight, onCopy, onAi }: Props) {
+export function SelectionToolbar({ selection, onHighlight, onCopy, onAi, onCard }: Props) {
   const { rect } = selection;
-  const width = onAi ? 330 : 210;
+  const width = (onAi ? 330 : 210) + (onCard ? 64 : 0);
   const left = Math.min(
     Math.max(12, rect.left + rect.width / 2 - width / 2),
     (typeof window === "undefined" ? 1200 : window.innerWidth) - width - 12,
@@ -53,6 +54,15 @@ export function SelectionToolbar({ selection, onHighlight, onCopy, onAi }: Props
       >
         Copy
       </button>
+      {onCard && (
+        <button
+          type="button"
+          onClick={onCard}
+          className="text-muted hover:text-ink rounded-full px-3 py-1.5 text-xs"
+        >
+          Card
+        </button>
+      )}
       {onAi && (
         <>
           <button

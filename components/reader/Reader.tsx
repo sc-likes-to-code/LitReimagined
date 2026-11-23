@@ -1,9 +1,11 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LevelSlider } from "@/components/reader/LevelSlider";
 import { Paragraph } from "@/components/reader/Paragraph";
+import { ReadAloudBar } from "@/components/reader/ReadAloudBar";
 import { ReaderPrefsPanel } from "@/components/reader/ReaderPrefsPanel";
 import { SelectionToolbar } from "@/components/reader/SelectionToolbar";
 import { useTextSelection } from "@/components/reader/useTextSelection";
@@ -22,7 +24,14 @@ import {
   type HighlightColor,
 } from "@/lib/client/library";
 import type { Chapter, ChapterSummary, Level } from "@/lib/data/types";
+import { useReadAloud } from "@/lib/client/read-aloud";
 import { cn } from "@/lib/utils";
+
+// Loaded on demand: most readers never open the card maker.
+const QuoteCardModal = dynamic(
+  () => import("@/components/reader/QuoteCardModal").then((m) => m.QuoteCardModal),
+  { ssr: false },
+);
 
 export type AiRequest = { kind: "rewrite" | "explain"; text: string; context: string };
 
@@ -76,6 +85,25 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
     level === 0 ? (available.includes(2) ? 2 : available[0]) : level
   ) as 1 | 2 | 3;
   const modernText = hasModern ? chapter.translations[modernLevel]! : chapter.original;
+
+  /* ----------------------------------------------------------- read aloud */
+  // Reads whichever version is on screen (the modern text in side-by-side view).
+  const spoken = split || (level !== 0 && hasModern) ? modernText : chapter.original;
+  const speech = useReadAloud(spoken);
+  const { stop: stopSpeech, current: speakingPara } = speech;
+  const [card, setCard] = useState<string | null>(null);
+
+  // A new chapter, or a different version, should never keep talking over the page.
+  useEffect(() => stopSpeech, [stopSpeech, chapter.idx, spoken]);
+
+  useEffect(() => {
+    if (speakingPara === null) return;
+    const el = document.querySelector<HTMLElement>(`[data-row="${speakingPara}"]`);
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    if (r.top < 120 || r.bottom > window.innerHeight - 160)
+      el.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [speakingPara]);
 
   const glossTerms = useMemo(
     () => chapter.glossary.map((g) => g.term),
@@ -349,6 +377,7 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
               bookmarked: bookmarkedParas.has(i),
               active: activePara === i,
               focus: prefs.focus,
+              speaking: speakingPara === i,
               family: prefs.family,
               onGloss: (term: string, el: HTMLElement) =>
                 setPopover({ kind: "gloss", term, rect: el.getBoundingClientRect() }),
@@ -474,6 +503,35 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
               <path d="M12 5v14" />
             </svg>
           </button>
+          {speech.supported && (
+            <button
+              type="button"
+              onClick={() =>
+                speech.status === "idle" ? speech.start(activePara) : speech.stop()
+              }
+              aria-pressed={speech.status !== "idle"}
+              aria-label={speech.status === "idle" ? "Read aloud" : "Stop reading aloud"}
+              title="Read aloud"
+              className={cn(
+                "grid size-9 shrink-0 place-items-center rounded-full transition-colors",
+                speech.status !== "idle" ? "bg-ink text-bg" : "hover:bg-surface",
+              )}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="size-[18px]"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M4 10v4h3.5L12 18V6L7.5 10Z" />
+                <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
+              </svg>
+            </button>
+          )}
           <Link
             href={nextHref ?? "#"}
             aria-label="Next chapter"
@@ -489,6 +547,20 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
         </div>
       </div>
 
+      {speech.status !== "idle" && (
+        <ReadAloudBar
+          status={speech.status}
+          current={speech.current}
+          total={spoken.length}
+          rate={speech.rate}
+          onPause={speech.pause}
+          onResume={speech.resume}
+          onStop={speech.stop}
+          onSkip={(d) => speech.start((speech.current ?? 0) + d)}
+          onRate={speech.setRate}
+        />
+      )}
+
       {/* selection toolbar */}
       {selection && (
         <SelectionToolbar
@@ -496,6 +568,19 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
           onHighlight={commitHighlight}
           onCopy={copy}
           onAi={onAi ? requestAi : undefined}
+          onCard={() => {
+            setCard(selection.text);
+            clearSelection();
+          }}
+        />
+      )}
+
+      {card && (
+        <QuoteCardModal
+          quote={card}
+          author={book.authorName}
+          book={book.title}
+          onClose={() => setCard(null)}
         />
       )}
 

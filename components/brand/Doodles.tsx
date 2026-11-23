@@ -1,6 +1,7 @@
 "use client";
 
 import { m, useReducedMotion } from "motion/react";
+import { fernArt, quillArt } from "@/lib/brand/botanical";
 import { cn } from "@/lib/utils";
 
 type Props = { className?: string; delay?: number };
@@ -11,7 +12,8 @@ function Draw({
   delay = 0,
   children,
   viewBox,
-}: Props & { children: React.ReactNode; viewBox: string }) {
+  stagger = 0.12,
+}: Props & { children: React.ReactNode; viewBox: string; stagger?: number }) {
   const reduce = useReducedMotion();
   return (
     <m.svg
@@ -26,7 +28,7 @@ function Draw({
       initial={reduce ? false : "hidden"}
       whileInView="shown"
       viewport={{ once: true, margin: "-15% 0px" }}
-      transition={{ staggerChildren: 0.12, delayChildren: delay }}
+      transition={{ staggerChildren: stagger, delayChildren: delay }}
     >
       {children}
     </m.svg>
@@ -42,30 +44,45 @@ const stroke = {
   },
 };
 
+const fine = {
+  hidden: { pathLength: 0, opacity: 0 },
+  shown: {
+    pathLength: 1,
+    opacity: 0.6,
+    transition: { duration: 1.1, ease: [0.22, 1, 0.36, 1] as const },
+  },
+};
+
+const quill = quillArt();
+const fern = fernArt();
+
+/** A quill with a feathered vane, fine barbs and a flick of ink. */
 export function QuillDoodle(props: Props) {
   return (
-    <Draw viewBox="0 0 160 220" {...props}>
-      <m.path variants={stroke} d="M140 14C86 22 44 66 36 132c46-8 92-44 104-118Z" />
-      <m.path variants={stroke} d="M36 190 106 72" />
-      <m.path
-        variants={stroke}
-        d="M62 150c10-2 20-6 28-14M78 124c10-2 18-6 26-14M94 98c8-2 14-6 20-12"
-      />
-      <m.path variants={stroke} d="M30 196c-6 4-8 10-6 18" />
+    <Draw viewBox="0 0 200 310" stagger={0.035} {...props}>
+      <m.path variants={stroke} d={quill.vane} fill="currentColor" fillOpacity={0.05} />
+      {quill.barbs.map((d, i) => (
+        <m.path key={i} variants={fine} d={d} />
+      ))}
+      <m.path variants={stroke} d={quill.shaft} strokeWidth={1.7} />
+      {quill.base.map((d, i) => (
+        <m.path key={i} variants={fine} d={d} />
+      ))}
+      <m.path variants={stroke} d={quill.drop} fill="currentColor" />
     </Draw>
   );
 }
 
+/** A curving fern frond; leaflets shrink toward the tip. */
 export function FernDoodle(props: Props) {
   return (
-    <Draw viewBox="0 0 140 260" {...props}>
-      <m.path variants={stroke} d="M70 252C66 190 70 120 100 18" />
-      {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-        <m.path
-          key={i}
-          variants={stroke}
-          d={`M${72 - i * 1.4} ${236 - i * 32}c-${26 - i * 2} -${6} -${40 - i * 3} -${22} -${44 - i * 3} -${34}M${74 - i * 1.4} ${222 - i * 32}c${22 - i} -${4} ${36 - i * 2} -${18} ${40 - i * 2} -${30}`}
-        />
+    <Draw viewBox="0 0 200 340" stagger={0.03} {...props}>
+      <m.path variants={stroke} d={fern.spine} strokeWidth={1.7} />
+      {fern.leaflets.map((d, i) => (
+        <m.path key={i} variants={stroke} d={d} fill="currentColor" fillOpacity={0.05} />
+      ))}
+      {fern.veins.map((d, i) => (
+        <m.path key={i} variants={fine} d={d} />
       ))}
     </Draw>
   );

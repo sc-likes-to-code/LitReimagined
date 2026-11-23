@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { AccountButton } from "@/components/layout/AccountButton";
+import { MobileMenu } from "@/components/layout/MobileMenu";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { siteConfig } from "@/config/site";
 
@@ -33,6 +34,7 @@ export function Nav() {
           <CommandPalette />
           <ThemeToggle />
           <AccountButton />
+          <MobileMenu />
         </div>
       </nav>
     </header>

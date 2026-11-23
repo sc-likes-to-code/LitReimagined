@@ -99,6 +99,7 @@ export const demoRepository: Repository = {
       prev: null,
       next: null,
       totalChapters: totalChapters(bookSlug),
+      isSample: true,
     };
   },
 

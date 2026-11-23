@@ -93,6 +93,8 @@ export type Chapter = {
   prev: number | null;
   next: number | null;
   totalChapters: number;
+  /** True for the bundled demo excerpts (not the full chapter). */
+  isSample?: boolean;
 };
 
 export type Collection = {

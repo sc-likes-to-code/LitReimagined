@@ -338,3 +338,86 @@ export function TeaStackDoodle(props: Props) {
     </Draw>
   );
 }
+
+/** A child lying on their stomach, feet in the air, lost in a book. */
+export function KidReadingDoodle(props: Props) {
+  const soft = { fill: "currentColor", fillOpacity: 0.06 } as const;
+  return (
+    <Draw viewBox="0 78 320 130" stagger={0.09} {...props}>
+      {/* the floor and a few blades of grass */}
+      <m.path variants={fine} d="M8 192c70 4 170 4 304-2" />
+      <m.path
+        variants={fine}
+        d="M268 193l-3-8M274 193l2-9M280 193l5-7M20 193l-2-6M26 193l3-7"
+      />
+
+      {/* far leg, bent up at the knee */}
+      <m.path
+        variants={fine}
+        d="M76 178C74 156 86 140 98 128M90 182C90 162 100 148 110 136"
+      />
+      <m.path variants={fine} d="M98 128c-5-6 0-14 8-12 8 2 10 10 6 18-3 4-8 4-12 2" />
+
+      {/* near leg: thigh along the floor, shin up, shoe in the air */}
+      <m.path variants={stroke} d="M114 164 68 170M114 188 68 188" />
+      <m.path variants={stroke} d="M68 170c-9 2-11 16-2 18" />
+      <m.path variants={stroke} d="M60 174C46 156 44 132 54 112" />
+      <m.path variants={stroke} d="M71 178C64 160 66 140 74 124" />
+      <m.path
+        variants={stroke}
+        d="M54 112c-6-6 0-15 9-12 8 3 10 12 7 20-2 4-7 5-12 4"
+        {...soft}
+      />
+      <m.path variants={fine} d="M50 122l18 4" />
+
+      {/* body: shorts, then a striped shirt */}
+      <m.path variants={stroke} d="M114 164c-7 6-7 18 0 24" />
+      <m.path variants={stroke} d="M114 164C132 150 170 148 196 160" />
+      <m.path variants={stroke} d="M114 188C140 192 170 192 200 188" />
+      <m.path variants={fine} d="M142 154c4 12 4 24 0 36" />
+      <m.path
+        variants={fine}
+        d="M158 152c3 12 3 26 0 38M174 154c3 12 3 24 0 34M188 158c2 10 2 20 0 28"
+      />
+
+      {/* arm propped on the elbow, hand at the book */}
+      <m.path variants={stroke} d="M192 160c4 10 10 20 16 28" />
+      <m.path variants={stroke} d="M208 188c12 2 26 0 38-6" />
+      <m.path variants={stroke} d="M200 168c2 8 6 14 10 18" />
+      <m.circle variants={stroke} cx="248" cy="181" r="5" {...soft} />
+
+      {/* head bent over the page */}
+      <m.circle variants={stroke} cx="222" cy="142" r="22" {...soft} />
+      <m.path variants={stroke} d="M200 138C198 116 224 108 242 120c8 6 7 14 5 18" />
+      <m.path
+        variants={fine}
+        d="M214 114c-3-8 3-13 10-11 -3 4-2 8 2 10M206 126c4-6 10-9 18-9"
+      />
+      <m.circle variants={fine} cx="206" cy="148" r="4" />
+      <m.path variants={fine} d="M231 134q5-3 9 0" />
+      <m.path variants={stroke} d="M233 144q4 3 8 0" />
+      <m.path variants={fine} d="M244 144l3 3-3 1M236 154q4 2 8-1" />
+
+      {/* the book */}
+      <m.path
+        variants={stroke}
+        d="M240 174Q258 166 276 170Q294 166 312 174V190Q294 184 276 188Q258 184 240 190Z"
+        {...soft}
+      />
+      <m.path variants={stroke} d="M276 170v18" />
+      <m.path
+        variants={fine}
+        d="M250 178q12-3 22 0M250 183q12-3 22 0M282 178q12-3 22 0M282 183q12-3 22 0"
+      />
+
+      {/* sparks rising from the story */}
+      <m.path
+        variants={stroke}
+        d="M290 130c1 5 3 7 8 8-5 1-7 3-8 8-1-5-3-7-8-8 5-1 7-3 8-8ZM256 104c1 3 2 4 5 5-3 1-4 2-5 5-1-3-2-4-5-5 3-1 4-2 5-5Z"
+      />
+      <m.circle variants={fine} cx="306" cy="108" r="1.8" />
+      <m.circle variants={fine} cx="272" cy="88" r="1.8" />
+      <m.path variants={fine} d="M302 154c4-6 10-8 14-6" />
+    </Draw>
+  );
+}

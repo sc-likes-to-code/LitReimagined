@@ -3,6 +3,7 @@ import {
   CandleDoodle,
   FernDoodle,
   InkwellDoodle,
+  KidReadingDoodle,
   MothDoodle,
   OpenBookDoodle,
   OrbitDoodle,
@@ -87,6 +88,10 @@ export default async function Home() {
         <QuillDoodle
           className="absolute top-40 left-[4%] hidden w-28 -rotate-12 xl:block"
           delay={0.3}
+        />
+        <KidReadingDoodle
+          className="absolute top-[17.5rem] left-[8%] hidden w-64 xl:block"
+          delay={0.5}
         />
         <OrbitDoodle
           className="absolute top-52 right-[5%] hidden w-32 xl:block"

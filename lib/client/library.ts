@@ -55,7 +55,7 @@ export const DEFAULT_PREFS: ReaderPrefs = {
   view: "single",
   level: 2,
   focus: false,
-  mode: "scroll",
+  mode: "book",
 };
 
 export const shelfStore = createStore<Record<string, ShelfEntry>>("shelf", {});

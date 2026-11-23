@@ -30,6 +30,13 @@ function trackErrors(page: Page) {
   return errors;
 }
 
+/** The scrolling reader is no longer the default, so tests of it ask for it. */
+const scrollMode = (page: Page) =>
+  page.addInitScript(() => {
+    if (!localStorage.getItem("lr:prefs:v1"))
+      localStorage.setItem("lr:prefs:v1", JSON.stringify({ mode: "scroll" }));
+  });
+
 for (const path of PAGES) {
   test(`loads ${path} without errors`, async ({ page }) => {
     const errors = trackErrors(page);
@@ -67,6 +74,7 @@ test("explore filters update the URL and the results", async ({ page }) => {
 test("the reader switches between the original and the modern version", async ({
   page,
 }) => {
+  await scrollMode(page);
   await page.goto("/read/pride-and-prejudice/1");
   const body = page.locator("article");
   await page.getByRole("button", { name: "Original", exact: true }).click();
@@ -89,6 +97,7 @@ test("a book can be added to the shelf and appears in the library", async ({ pag
 test("the quill panel shows an explanation (AI response mocked, so no quota is used)", async ({
   page,
 }) => {
+  await scrollMode(page);
   await page.route("**/api/ai/explain", (route) =>
     route.fulfill({
       json: {
@@ -148,6 +157,7 @@ test("a selected passage becomes a downloadable quote card", async ({
   page,
   isMobile,
 }) => {
+  await scrollMode(page);
   test.skip(isMobile, "Download checks run on desktop.");
   await page.goto("/read/pride-and-prejudice/1", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "Original", exact: true }).click();
@@ -265,6 +275,7 @@ test("side-by-side view labels each column with its version", async ({
   page,
   isMobile,
 }) => {
+  await scrollMode(page);
   test.skip(isMobile, "The sticky column header is a desktop layout.");
   await page.goto("/read/alices-adventures-in-wonderland/1", {
     waitUntil: "networkidle",
@@ -285,6 +296,7 @@ const daysAgo = (n: number) => {
 };
 
 test("reading for a while records words for today", async ({ page }) => {
+  await scrollMode(page);
   await page.goto("/read/alices-adventures-in-wonderland/1", {
     waitUntil: "networkidle",
   });
@@ -523,12 +535,165 @@ test.describe("book view", () => {
     await page.goto("/read/alices-adventures-in-wonderland/1", {
       waitUntil: "networkidle",
     });
-    await expect(page.locator(".book-page")).toHaveCount(0);
-    await page.getByRole("button", { name: "Switch to book view" }).click();
-    await expect(page.locator(".book-page").first()).toBeVisible();
-    await page.reload({ waitUntil: "networkidle" });
+    // Book is the default.
     await expect(page.locator(".book-page").first()).toBeVisible();
     await page.getByRole("button", { name: "Switch to scrolling view" }).click();
     await expect(page.locator(".book-page")).toHaveCount(0);
+    await page.reload({ waitUntil: "networkidle" });
+    await expect(page.locator(".book-page")).toHaveCount(0);
+    await page.getByRole("button", { name: "Switch to book view" }).click();
+    await expect(page.locator(".book-page").first()).toBeVisible();
+  });
+
+  /** Selects all the text of the first paragraph on the given page (left = original). */
+  const selectOn = (page: Page, side: "left" | "right") =>
+    page.evaluate((cls) => {
+      const p = document.querySelector(`.${cls} .book-text p[data-p]`)!;
+      const r = document.createRange();
+      r.selectNodeContents(p);
+      const sel = window.getSelection()!;
+      sel.removeAllRanges();
+      sel.addRange(r);
+    }, `book-page-${side}`);
+
+  test("highlights, notes and bookmarks work on book pages", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "Selection gestures are checked on desktop.");
+    await page.goto("/read/alices-adventures-in-wonderland/1", {
+      waitUntil: "networkidle",
+    });
+    await expect(page.locator(".book-page-left")).toBeVisible();
+
+    await selectOn(page, "left");
+    await page.getByRole("button", { name: "Highlight Ember" }).click();
+    const mark = page.locator(".book-page-left mark").first();
+    await expect(mark).toBeVisible();
+
+    // Clicking a highlight opens its note instead of turning the page.
+    const before = (await pageStatus(page)).text;
+    await mark.click();
+    await expect(page.getByRole("dialog").getByText("Your note")).toBeVisible();
+    expect((await pageStatus(page)).text).toBe(before);
+    await page.getByPlaceholder("Add a thought…").fill("a thought");
+    await page.getByPlaceholder("Add a thought…").blur();
+
+    // The highlight survives a reload, with its note.
+    await page.reload({ waitUntil: "networkidle" });
+    await expect(page.locator(".book-page-left mark").first()).toBeVisible();
+
+    // A bookmark marks the page.
+    const ribbon = page.getByRole("button", { name: "Bookmark this page" });
+    await ribbon.click();
+    await expect(
+      page.getByRole("button", { name: "Remove bookmark from this page" }),
+    ).toBeVisible();
+    await page.reload({ waitUntil: "networkidle" });
+    await expect(
+      page.getByRole("button", { name: "Remove bookmark from this page" }),
+    ).toBeVisible();
+  });
+
+  test("a selected passage on a book page becomes a quote card or an explanation", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "Selection gestures are checked on desktop.");
+    await page.route("**/api/ai/explain", (route) =>
+      route.fulfill({
+        json: {
+          ok: true,
+          output: { meaning: "A mocked plain-English reading.", note: "A mocked note." },
+          cached: false,
+          demo: false,
+          remaining: 2,
+          limit: 3,
+        },
+      }),
+    );
+    await page.goto("/read/pride-and-prejudice/1", { waitUntil: "networkidle" });
+    await expect(page.locator(".book-page-left")).toBeVisible();
+
+    await selectOn(page, "left");
+    await page.getByRole("button", { name: "Card", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Make a quote card" });
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+
+    await selectOn(page, "right");
+    await page.getByRole("button", { name: "Explain" }).click();
+    await expect(page.getByRole("dialog", { name: "The quill" })).toContainText(
+      "A mocked plain-English reading.",
+      { timeout: 15_000 },
+    );
+  });
+
+  test("glossary words on the original page open their meaning", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "Checked on desktop.");
+    await page.goto("/read/pride-and-prejudice/1", { waitUntil: "networkidle" });
+    const term = page.locator(".book-page-left .book-text button").first();
+    // The library has no glossary entries yet; the check applies once there are some.
+    test.skip((await term.count()) === 0, "No glossary terms on this page.");
+    await expect(term).toBeVisible();
+    await term.click();
+    await expect(page.locator("[data-popover]")).toBeVisible();
+  });
+
+  test("reading aloud turns the pages to follow the voice", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "Checked on desktop.");
+    await page.addInitScript(() => {
+      class FakeUtterance {
+        text: string;
+        onstart: (() => void) | null = null;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(text: string) {
+          this.text = text;
+        }
+      }
+      let queue: FakeUtterance[] = [];
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const pump = () => {
+        const u = queue.shift();
+        if (!u) return;
+        u.onstart?.();
+        timer = setTimeout(() => {
+          u.onend?.();
+          pump();
+        }, 40);
+      };
+      Object.defineProperty(window, "SpeechSynthesisUtterance", { value: FakeUtterance });
+      Object.defineProperty(window, "speechSynthesis", {
+        value: {
+          getVoices: () => [],
+          speak: (u: FakeUtterance) => {
+            queue.push(u);
+            if (queue.length === 1 && !timer) pump();
+          },
+          cancel: () => {
+            queue = [];
+            clearTimeout(timer);
+            timer = undefined;
+          },
+        },
+      });
+    });
+    await page.goto("/read/alices-adventures-in-wonderland/2", {
+      waitUntil: "networkidle",
+    });
+    await expect(page.locator(".book-page-left")).toBeVisible();
+    expect((await pageStatus(page)).first).toBe(1);
+    await page.getByRole("button", { name: "Read aloud" }).click();
+    await expect
+      .poll(async () => (await pageStatus(page)).first, { timeout: 15_000 })
+      .toBeGreaterThan(1);
   });
 });

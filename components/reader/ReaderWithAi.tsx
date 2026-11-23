@@ -30,14 +30,13 @@ export function ReaderWithAi({ chapter: rawChapter, ...rest }: Props) {
     [props.book.title, props.book.authorName],
   );
 
-  if (mode === "book")
-    return (
-      <BookReader book={props.book} chapter={props.chapter} chapters={props.chapters} />
-    );
-
   return (
     <>
-      <Reader {...props} onAi={open} />
+      {mode === "book" ? (
+        <BookReader {...props} onAi={open} />
+      ) : (
+        <Reader {...props} onAi={open} />
+      )}
       {request && (
         <AiPanel
           key={`${request.kind}:${request.text}`}

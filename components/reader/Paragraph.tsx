@@ -29,7 +29,7 @@ type Props = {
   family: "serif" | "sans";
 };
 
-const HL_CLASS: Record<string, string> = {
+export const HL_CLASS: Record<string, string> = {
   ember: "bg-ember/25 decoration-ember",
   circuit: "bg-circuit/25 decoration-circuit",
   sage: "bg-sage/30 decoration-sage",

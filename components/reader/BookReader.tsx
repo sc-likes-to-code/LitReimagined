@@ -1,8 +1,10 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  Fragment,
   useCallback,
   useEffect,
   useMemo,
@@ -13,14 +15,27 @@ import {
 } from "react";
 import { LogoMark } from "@/components/brand/Logo";
 import { LevelSlider } from "@/components/reader/LevelSlider";
+import { HL_CLASS } from "@/components/reader/Paragraph";
+import { MarkPopover, type Popover } from "@/components/reader/MarkPopover";
 import { ModeToggle } from "@/components/reader/ModeToggle";
+import { ReadAloudBar } from "@/components/reader/ReadAloudBar";
 import { ReaderPrefsPanel } from "@/components/reader/ReaderPrefsPanel";
+import { SelectionToolbar } from "@/components/reader/SelectionToolbar";
+import { StreakChip } from "@/components/reader/StreakChip";
+import { useTextSelection } from "@/components/reader/useTextSelection";
 import {
+  addHighlight,
   saveProgress,
+  toggleBookmark,
   updatePrefs,
+  useBookmarks,
+  useHighlights,
   useProgress,
   useReaderPrefs,
+  type Highlight,
+  type HighlightColor,
 } from "@/lib/client/library";
+import { useReadAloud } from "@/lib/client/read-aloud";
 import { recordReading } from "@/lib/client/streaks";
 import {
   LEVEL_LABELS,
@@ -35,20 +50,37 @@ import {
   type BookType,
 } from "@/lib/reader/book-layout";
 import { viewForPara, type Piece } from "@/lib/reader/paginate";
+import {
+  buildSegments,
+  findGlossMarks,
+  findHighlightMark,
+  type Mark,
+} from "@/lib/reader/segments";
 import { cn } from "@/lib/utils";
+import type { AiRequest } from "@/components/reader/Reader";
+
+// Loaded on demand: most readers never open the card maker.
+const QuoteCardModal = dynamic(
+  () => import("@/components/reader/QuoteCardModal").then((m) => m.QuoteCardModal),
+  { ssr: false },
+);
 
 type Props = {
   book: { slug: string; title: string; authorName: string };
   chapter: Chapter;
   chapters: ChapterSummary[];
+  /** Plugs the live AI tools into the selection toolbar. Omitted when AI is unavailable. */
+  onAi?: (req: AiRequest) => void;
 };
 
 /** Set when paging backwards across a chapter so the previous chapter opens on its last page. */
 const OPEN_AT_END = "lr:book-open-end";
 
-export function BookReader({ book, chapter, chapters }: Props) {
+export function BookReader({ book, chapter, chapters, onAi }: Props) {
   const prefs = useReaderPrefs();
   const progress = useProgress();
+  const allHighlights = useHighlights();
+  const bookmarks = useBookmarks();
   const stageRef = useRef<HTMLDivElement>(null);
   const [stage, setStage] = useState<{ w: number; h: number } | null>(null);
   const [fontsReady, setFontsReady] = useState(false);
@@ -74,6 +106,29 @@ export function BookReader({ book, chapter, chapters }: Props) {
         : available[0]
   ) as 1 | 2 | 3;
   const modernText = hasModern ? chapter.translations[modernLevel]! : null;
+
+  /* ------------------------------------------------------------- annotations */
+  const highlights = useMemo(
+    () => allHighlights.filter((h) => h.book === book.slug && h.chapter === chapter.idx),
+    [allHighlights, book.slug, chapter.idx],
+  );
+  const bookmarked = useMemo(
+    () =>
+      new Set(
+        bookmarks
+          .filter((b) => b.book === book.slug && b.chapter === chapter.idx)
+          .map((b) => b.paragraph),
+      ),
+    [bookmarks, book.slug, chapter.idx],
+  );
+
+  /* ------------------------------------------------------------- read aloud */
+  // Reads the right-hand version (the original when the chapter has no modern text yet).
+  const spoken = modernText ?? chapter.original;
+  const speech = useReadAloud(spoken);
+  const { stop: stopSpeech, current: speakingPara } = speech;
+  // A new chapter, or a different version, should never keep talking over the page.
+  useEffect(() => stopSpeech, [stopSpeech, chapter.idx, spoken]);
 
   /* -------------------------------------------------------------- measuring */
   useEffect(() => {
@@ -177,6 +232,7 @@ export function BookReader({ book, chapter, chapters }: Props) {
             {chapters.length > 1 && ` · ${chapterPos} of ${chapters.length}`}
           </p>
           <div className="flex items-center gap-2">
+            <StreakChip />
             <ModeToggle />
             <button
               type="button"
@@ -212,6 +268,10 @@ export function BookReader({ book, chapter, chapters }: Props) {
             onAnchor={setAnchor}
             prevHref={prevHref}
             nextHref={nextHref}
+            highlights={highlights}
+            bookmarked={bookmarked}
+            speakingPara={speakingPara}
+            onAi={onAi}
           />
         ) : (
           <p className="font-display text-muted animate-pulse text-2xl italic">
@@ -249,6 +309,35 @@ export function BookReader({ book, chapter, chapters }: Props) {
               The modern version of this chapter is still being written.
             </p>
           )}
+          {speech.supported && (
+            <button
+              type="button"
+              onClick={() =>
+                speech.status === "idle" ? speech.start(anchor ?? 0) : speech.stop()
+              }
+              aria-pressed={speech.status !== "idle"}
+              aria-label={speech.status === "idle" ? "Read aloud" : "Stop reading aloud"}
+              title="Read aloud"
+              className={cn(
+                "grid size-9 shrink-0 place-items-center rounded-full transition-colors",
+                speech.status !== "idle" ? "bg-ink text-bg" : "hover:bg-surface",
+              )}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="size-[18px]"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M4 10v4h3.5L12 18V6L7.5 10Z" />
+                <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
+              </svg>
+            </button>
+          )}
           <Link
             href={nextHref ?? "#"}
             aria-label="Next chapter"
@@ -263,6 +352,20 @@ export function BookReader({ book, chapter, chapters }: Props) {
           </Link>
         </div>
       </div>
+
+      {speech.status !== "idle" && (
+        <ReadAloudBar
+          status={speech.status}
+          current={speech.current}
+          total={spoken.length}
+          rate={speech.rate}
+          onPause={speech.pause}
+          onResume={speech.resume}
+          onStop={speech.stop}
+          onSkip={(d) => speech.start((speech.current ?? 0) + d)}
+          onRate={speech.setRate}
+        />
+      )}
     </div>
   );
 }
@@ -280,6 +383,10 @@ type ViewProps = {
   onAnchor: (para: number) => void;
   prevHref: string | null;
   nextHref: string | null;
+  highlights: Highlight[];
+  bookmarked: Set<number>;
+  speakingPara: number | null;
+  onAi?: (req: AiRequest) => void;
 };
 
 type Zone = "prev" | "next" | null;
@@ -295,8 +402,21 @@ function BookView({
   onAnchor,
   prevHref,
   nextHref,
+  highlights,
+  bookmarked,
+  speakingPara,
+  onAi,
 }: ViewProps) {
   const router = useRouter();
+  const regionRef = useRef<HTMLDivElement>(null);
+  const [selection, clearSelection] = useTextSelection(regionRef);
+  const [popover, setPopover] = useState<Popover | null>(null);
+  const [card, setCard] = useState<string | null>(null);
+  const closePopover = useCallback(() => setPopover(null), []);
+  const glossTerms = useMemo(
+    () => chapter.glossary.map((g) => g.term),
+    [chapter.glossary],
+  );
   const { views, geometry, aligned } = layout;
   const [index, setIndex] = useState(() => viewForPara(views, initialPara));
   const [side, setSide] = useState<"orig" | "modern">("modern");
@@ -306,6 +426,23 @@ function BookView({
   const touch = useRef<{ x: number; y: number } | null>(null);
   const counted = useRef(new Set<string>());
   const view = views[index] ?? views[0];
+
+  // While read-aloud is speaking, the book turns to the page being read.
+  const [lastSpoken, setLastSpoken] = useState<number | null>(null);
+  if (speakingPara !== lastSpoken) {
+    setLastSpoken(speakingPara);
+    if (
+      view &&
+      speakingPara !== null &&
+      (speakingPara < view.first || speakingPara > view.last)
+    ) {
+      const target = viewForPara(views, speakingPara);
+      if (target !== index) {
+        setFlip({ dir: target > index ? 1 : -1, from: index });
+        setIndex(target);
+      }
+    }
+  }
 
   const go = useCallback(
     (delta: 1 | -1) => {
@@ -325,12 +462,19 @@ function BookView({
         }
         return;
       }
+      clearSelection();
+      setPopover(null);
       setFlip({ dir: delta, from: index });
       setIndex(next);
-      onAnchor(views[next].first);
     },
-    [index, views, nextHref, prevHref, router, onAnchor],
+    [index, views, nextHref, prevHref, router, clearSelection],
   );
+
+  // Tell the host which paragraph is on top (where read-aloud starts, and the place kept on resize).
+  const firstPara = view?.first;
+  useEffect(() => {
+    if (firstPara !== undefined) onAnchor(firstPara);
+  }, [firstPara, onAnchor]);
 
   // Keyboard: arrows and page keys turn pages.
   useEffect(() => {
@@ -340,6 +484,7 @@ function BookView({
       // Space activates a focused button or link, so leave it alone there; arrows still turn pages.
       if (e.key === " " && t && ["BUTTON", "A"].includes(t.tagName)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === "Escape") setPopover(null);
       if (
         e.key === "ArrowRight" ||
         e.key === "PageDown" ||
@@ -407,11 +552,74 @@ function BookView({
     e: MouseEvent<HTMLElement>,
     position: "left" | "right" | "single",
   ) => {
-    if ((e.target as HTMLElement).closest("button, a")) return;
+    if ((e.target as HTMLElement).closest("button, a, mark")) return;
     if (!window.getSelection()?.isCollapsed) return;
     const zone = zoneOf(e, position);
     if (zone === "next") go(1);
     else if (zone === "prev") go(-1);
+  };
+
+  // A bookmark marks the page: any bookmarked paragraph on it counts.
+  const onPage = [...bookmarked].filter((p) => p >= view.first && p <= view.last);
+  const ribbon = (
+    <button
+      type="button"
+      onClick={() => {
+        if (onPage.length)
+          onPage.forEach((p) => toggleBookmark(book.slug, chapter.idx, p));
+        else toggleBookmark(book.slug, chapter.idx, view.first);
+      }}
+      aria-pressed={onPage.length > 0}
+      aria-label={onPage.length ? "Remove bookmark from this page" : "Bookmark this page"}
+      className={cn(
+        "absolute top-0 right-6 grid h-9 w-6 place-items-start justify-center pt-1.5 transition-colors",
+        onPage.length ? "text-ember" : "text-faint hover:text-ink",
+      )}
+    >
+      <svg
+        viewBox="0 0 24 36"
+        className="h-8 w-5"
+        fill={onPage.length ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <path d="M3 0v33l9-7 9 7V0" />
+      </svg>
+    </button>
+  );
+
+  const commitHighlight = (color: HighlightColor) => {
+    if (!selection) return;
+    addHighlight({
+      book: book.slug,
+      chapter: chapter.idx,
+      paragraph: selection.paragraph,
+      text: selection.text,
+      color,
+    });
+    clearSelection();
+  };
+  const copy = async () => {
+    if (!selection) return;
+    try {
+      await navigator.clipboard.writeText(
+        `“${selection.text}” — ${book.authorName}, ${book.title}`,
+      );
+    } catch {
+      /* clipboard unavailable */
+    }
+    clearSelection();
+  };
+  const requestAi = (kind: "rewrite" | "explain") => {
+    if (!selection || !onAi) return;
+    onAi({
+      kind,
+      text: selection.text,
+      context: chapter.original[selection.paragraph] ?? "",
+    });
+    clearSelection();
   };
 
   const makePage = (
@@ -422,35 +630,60 @@ function BookView({
     number: number | null,
     title: ReactNode,
     live = true,
-  ) => (
-    <BookPage
-      pieces={pieces}
-      geometry={geometry}
-      type={type}
-      position={position}
-      head={head}
-      number={number}
-      title={vi === 0 ? title : null}
-      hover={live ? hover : null}
-      onMove={(e) => live && setHover(zoneOf(e, position))}
-      onLeave={() => live && setHover(null)}
-      onClick={(e) => live && onPageClick(e, position)}
-    />
-  );
+  ) => {
+    const source: "original" | "modern" =
+      position === "right"
+        ? aligned
+          ? "modern"
+          : "original"
+        : position === "left" || !aligned || side === "orig"
+          ? "original"
+          : "modern";
+    return (
+      <BookPage
+        pieces={pieces}
+        source={source}
+        highlights={highlights}
+        glossTerms={source === "original" ? glossTerms : undefined}
+        speakingPara={live ? speakingPara : null}
+        onGloss={(term, el) =>
+          setPopover({ kind: "gloss", term, rect: el.getBoundingClientRect() })
+        }
+        onHighlight={(id, el) =>
+          setPopover({ kind: "highlight", id, rect: el.getBoundingClientRect() })
+        }
+        ribbon={live && position !== "left" ? ribbon : null}
+        geometry={geometry}
+        type={type}
+        position={position}
+        head={head}
+        number={number}
+        title={vi === 0 ? title : null}
+        hover={live ? hover : null}
+        onMove={(e) => live && setHover(zoneOf(e, position))}
+        onLeave={() => live && setHover(null)}
+        onClick={(e) => live && onPageClick(e, position)}
+      />
+    );
+  };
 
   /** One page of the open spread `vi`, as it is printed. */
   const spreadPage = (vi: number, position: "left" | "right", live = true) => {
     const v = views[vi];
     const left = position === "left";
-    const head = left
-      ? aligned
-        ? origLabel
-        : <span className="eyebrow">{book.title}</span>
-      : v.pages[1] || aligned
-        ? aligned
-          ? modernLabel
-          : <span className="eyebrow">{chapter.title}</span>
-        : null;
+    const head = left ? (
+      aligned ? (
+        origLabel
+      ) : (
+        <span className="eyebrow">{book.title}</span>
+      )
+    ) : v.pages[1] || aligned ? (
+      aligned ? (
+        modernLabel
+      ) : (
+        <span className="eyebrow">{chapter.title}</span>
+      )
+    ) : null;
     return makePage(
       vi,
       v.pages[left ? 0 : 1] ?? [],
@@ -574,6 +807,7 @@ function BookView({
       role="region"
       aria-roledescription="book"
       aria-label={`${chapter.title}, ${book.title}`}
+      ref={regionRef}
       className="select-text"
       onTouchStart={(e) => {
         touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -581,7 +815,7 @@ function BookView({
       onTouchEnd={(e) => {
         const start = touch.current;
         touch.current = null;
-        if (!start) return;
+        if (!start || !window.getSelection()?.isCollapsed) return;
         const dx = e.changedTouches[0].clientX - start.x;
         const dy = e.changedTouches[0].clientY - start.y;
         if (Math.abs(dx) > 50 && Math.abs(dy) < 60) go(dx < 0 ? 1 : -1);
@@ -599,6 +833,35 @@ function BookView({
           Next page
         </button>
       </div>
+
+      {selection && (
+        <SelectionToolbar
+          selection={selection}
+          onHighlight={commitHighlight}
+          onCopy={copy}
+          onAi={onAi ? requestAi : undefined}
+          onCard={() => {
+            setCard(selection.text);
+            clearSelection();
+          }}
+        />
+      )}
+      {card && (
+        <QuoteCardModal
+          quote={card}
+          author={book.authorName}
+          book={book.title}
+          onClose={() => setCard(null)}
+        />
+      )}
+      {popover && (
+        <MarkPopover
+          popover={popover}
+          glossary={chapter.glossary}
+          highlights={highlights}
+          onClose={closePopover}
+        />
+      )}
     </div>
   );
 }
@@ -607,6 +870,13 @@ function BookView({
 
 function BookPage({
   pieces,
+  source,
+  highlights,
+  glossTerms,
+  speakingPara,
+  onGloss,
+  onHighlight,
+  ribbon,
   geometry: g,
   type,
   position,
@@ -619,6 +889,13 @@ function BookPage({
   onClick,
 }: {
   pieces: Piece[];
+  source: "original" | "modern";
+  highlights: Highlight[];
+  glossTerms?: string[];
+  speakingPara: number | null;
+  onGloss: (term: string, el: HTMLElement) => void;
+  onHighlight: (id: string, el: HTMLElement) => void;
+  ribbon: ReactNode;
   geometry: BookGeometry;
   type: BookType;
   position: "left" | "right" | "single";
@@ -673,12 +950,23 @@ function BookPage({
           <p
             key={`${p.para}-${i}`}
             data-p={p.para}
+            data-src={source}
+            data-speaking={speakingPara === p.para ? "true" : undefined}
+            className={cn(speakingPara === p.para && "bg-ember/10 rounded-sm")}
             style={{ textIndent: p.start ? "1.4em" : 0 }}
           >
-            {p.text}
+            <PieceText
+              piece={p}
+              highlights={highlights}
+              glossTerms={glossTerms}
+              onGloss={onGloss}
+              onHighlight={onHighlight}
+            />
           </p>
         ))}
       </div>
+
+      {ribbon}
 
       {number !== null && (
         <p
@@ -702,4 +990,68 @@ function BookPage({
       )}
     </div>
   );
+}
+
+/* Text of one piece of a paragraph, with its highlights and glossary terms. */
+function PieceText({
+  piece,
+  highlights,
+  glossTerms,
+  onGloss,
+  onHighlight,
+}: {
+  piece: Piece;
+  highlights: Highlight[];
+  glossTerms?: string[];
+  onGloss: (term: string, el: HTMLElement) => void;
+  onHighlight: (id: string, el: HTMLElement) => void;
+}) {
+  const segments = useMemo(() => {
+    const marks: Mark[] = [];
+    for (const h of highlights) {
+      if (h.paragraph !== piece.para) continue;
+      const m = findHighlightMark(piece.text, h);
+      if (m) marks.push(m);
+    }
+    if (glossTerms?.length) marks.push(...findGlossMarks(piece.text, glossTerms));
+    return buildSegments(piece.text, marks);
+  }, [piece, highlights, glossTerms]);
+
+  return segments.map((s, i) => {
+    if (s.type === "text") return <Fragment key={i}>{s.text}</Fragment>;
+    const m = s.mark;
+    if (m.kind === "gloss")
+      return (
+        <button
+          key={i}
+          type="button"
+          onClick={(e) => onGloss(m.term, e.currentTarget)}
+          className="decoration-circuit/70 hover:decoration-circuit cursor-help underline decoration-dotted underline-offset-[5px]"
+        >
+          {s.text}
+        </button>
+      );
+    return (
+      <mark
+        key={i}
+        tabIndex={0}
+        role="button"
+        onClick={(e) => onHighlight(m.id, e.currentTarget)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            e.stopPropagation();
+            onHighlight(m.id, e.currentTarget);
+          }
+        }}
+        className={cn(
+          "cursor-pointer rounded-sm text-inherit",
+          HL_CLASS[m.color] ?? HL_CLASS.ember,
+          m.hasNote && "underline decoration-2 underline-offset-4",
+        )}
+      >
+        {s.text}
+      </mark>
+    );
+  });
 }

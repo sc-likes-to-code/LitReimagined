@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LevelSlider } from "@/components/reader/LevelSlider";
 import { Paragraph } from "@/components/reader/Paragraph";
 import { ModeToggle } from "@/components/reader/ModeToggle";
+import { MarkPopover, type Popover } from "@/components/reader/MarkPopover";
 import { ReadAloudBar } from "@/components/reader/ReadAloudBar";
 import { StreakChip } from "@/components/reader/StreakChip";
 import { ReaderPrefsPanel } from "@/components/reader/ReaderPrefsPanel";
@@ -14,10 +15,8 @@ import { useTextSelection } from "@/components/reader/useTextSelection";
 import { LogoMark } from "@/components/brand/Logo";
 import {
   addHighlight,
-  removeHighlight,
   saveProgress,
   toggleBookmark,
-  updateHighlightNote,
   updatePrefs,
   useBookmarks,
   useHighlights,
@@ -53,10 +52,6 @@ type Props = {
 
 const MEASURE = { narrow: "36rem", medium: "42rem", wide: "50rem" } as const;
 
-type Popover =
-  | { kind: "gloss"; term: string; rect: DOMRect }
-  | { kind: "highlight"; id: string; rect: DOMRect };
-
 export function Reader({ book, chapter, chapters, onAi }: Props) {
   const prefs = useReaderPrefs();
   const bookmarks = useBookmarks();
@@ -69,6 +64,7 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
   const [showPrefs, setShowPrefs] = useState(false);
   const [popover, setPopover] = useState<Popover | null>(null);
   const [selection, clearSelection] = useTextSelection(articleRef);
+  const closePopover = useCallback(() => setPopover(null), []);
 
   /* ---------------------------------------------------------------- levels */
   const available = useMemo(
@@ -244,22 +240,6 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [available, hasModern, prefs.view]);
 
-  // Close floating popovers on scroll or outside click.
-  useEffect(() => {
-    if (!popover) return;
-    const close = () => setPopover(null);
-    const onDown = (e: MouseEvent) => {
-      if (!(e.target as HTMLElement).closest("[data-popover], [data-gloss], mark"))
-        close();
-    };
-    window.addEventListener("scroll", close, { passive: true });
-    window.addEventListener("mousedown", onDown);
-    return () => {
-      window.removeEventListener("scroll", close);
-      window.removeEventListener("mousedown", onDown);
-    };
-  }, [popover]);
-
   /* -------------------------------------------------------------- actions */
   const commitHighlight = useCallback(
     (color: HighlightColor) => {
@@ -296,15 +276,6 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
     },
     [selection, onAi, chapter.original, clearSelection],
   );
-
-  const activeHighlight =
-    popover?.kind === "highlight"
-      ? highlights.find((h) => h.id === popover.id)
-      : undefined;
-  const activeGloss =
-    popover?.kind === "gloss"
-      ? chapter.glossary.find((g) => g.term.toLowerCase() === popover.term.toLowerCase())
-      : undefined;
 
   /* --------------------------------------------------------------- render */
   const bodyStyle = {
@@ -621,58 +592,12 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
 
       {/* glossary + highlight popovers */}
       {popover && (
-        <div
-          data-popover
-          role="dialog"
-          style={{
-            top: Math.min(
-              popover.rect.bottom + 10,
-              (typeof window === "undefined" ? 800 : window.innerHeight) - 220,
-            ),
-            left: Math.min(
-              Math.max(12, popover.rect.left),
-              (typeof window === "undefined" ? 1200 : window.innerWidth) - 316,
-            ),
-          }}
-          className="glass fixed z-[60] w-[19rem] rounded-2xl p-4 shadow-2xl"
-        >
-          {popover.kind === "gloss" && activeGloss && (
-            <>
-              <p className="font-display text-lg">{activeGloss.term}</p>
-              <p className="text-muted mt-1 text-sm leading-relaxed">
-                {activeGloss.definition}
-              </p>
-              {activeGloss.modernEquiv && (
-                <p className="text-circuit mt-2 text-xs">
-                  Today: {activeGloss.modernEquiv}
-                </p>
-              )}
-            </>
-          )}
-          {popover.kind === "highlight" && activeHighlight && (
-            <>
-              <p className="eyebrow mb-2">Your note</p>
-              <textarea
-                key={activeHighlight.id}
-                defaultValue={activeHighlight.note ?? ""}
-                onBlur={(e) => updateHighlightNote(activeHighlight.id, e.target.value)}
-                placeholder="Add a thought…"
-                rows={3}
-                className="bg-surface border-line w-full resize-none rounded-xl border p-3 text-sm outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  removeHighlight(activeHighlight.id);
-                  setPopover(null);
-                }}
-                className="text-muted hover:text-ember mt-2 text-xs underline underline-offset-4"
-              >
-                Remove highlight
-              </button>
-            </>
-          )}
-        </div>
+        <MarkPopover
+          popover={popover}
+          glossary={chapter.glossary}
+          highlights={highlights}
+          onClose={closePopover}
+        />
       )}
     </div>
   );

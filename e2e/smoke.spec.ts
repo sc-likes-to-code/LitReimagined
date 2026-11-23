@@ -122,6 +122,31 @@ test("the logo always takes you to the very top of the home page", async ({ page
   await expect(page).toHaveURL(/\/$/);
 });
 
+test("the page stays still while search is open and scrolls again after", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "The search button lives in the desktop nav.");
+  await page.goto("/", { waitUntil: "networkidle" });
+  const y = () => page.evaluate(() => Math.round(scrollY));
+  await page.mouse.move(900, 450);
+  await page.mouse.wheel(0, 600);
+  await expect.poll(y).toBeGreaterThan(300);
+
+  await page.getByRole("button", { name: /Search/ }).click();
+  await expect(page.getByRole("dialog", { name: "Search and navigate" })).toBeVisible();
+  const before = await y();
+  await page.mouse.wheel(0, 800);
+  await page.keyboard.press("PageDown");
+  await page.waitForTimeout(1200);
+  expect(await y()).toBe(before);
+
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Search and navigate" })).toBeHidden();
+  await page.mouse.wheel(0, 800);
+  await expect.poll(y).toBeGreaterThan(before + 300);
+});
+
 test("explore filters update the URL and the results", async ({ page }) => {
   await page.goto("/explore", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "Gothic", exact: true }).first().click();

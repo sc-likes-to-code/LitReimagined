@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { siteConfig } from "@/config/site";
+import { lockPageScroll } from "@/lib/client/smooth-scroll";
 
 type Item = { label: string; href: string; hint: string };
 
@@ -20,17 +21,24 @@ export function CommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
+  const unlock = useRef<(() => void) | null>(null);
+  const release = () => {
+    unlock.current?.();
+    unlock.current = null;
+  };
 
   const results = ITEMS.filter((i) =>
     i.label.toLowerCase().includes(query.trim().toLowerCase()),
   );
 
   const open = useCallback(() => {
+    if (!unlock.current) unlock.current = lockPageScroll();
     dialogRef.current?.showModal();
     inputRef.current?.focus();
   }, []);
   const close = useCallback(() => {
     dialogRef.current?.close();
+    release();
     setQuery("");
     setActive(0);
   }, []);
@@ -94,6 +102,7 @@ export function CommandPalette() {
       <dialog
         ref={dialogRef}
         onClose={() => {
+          release();
           setQuery("");
           setActive(0);
         }}

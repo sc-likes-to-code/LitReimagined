@@ -46,3 +46,32 @@ export function takePendingTop(): boolean {
   topPending = false;
   return was;
 }
+
+let locks = 0;
+let saved: { overflow: string; paddingRight: string } | null = null;
+
+/**
+ * Freezes the page behind a dialog or menu: no wheel, touch or key scrolling, and no
+ * jump when the scrollbar disappears. Returns the function that releases this lock.
+ */
+export function lockPageScroll(): () => void {
+  if (locks++ === 0) {
+    const body = document.body;
+    saved = { overflow: body.style.overflow, paddingRight: body.style.paddingRight };
+    const bar = window.innerWidth - document.documentElement.clientWidth;
+    if (bar > 0) body.style.paddingRight = `${bar}px`;
+    body.style.overflow = "hidden";
+    instance?.stop();
+  }
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    if (--locks === 0 && saved) {
+      document.body.style.overflow = saved.overflow;
+      document.body.style.paddingRight = saved.paddingRight;
+      saved = null;
+      instance?.start();
+    }
+  };
+}

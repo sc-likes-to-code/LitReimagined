@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { signOutAndClear, useUser } from "@/lib/client/auth";
 import { siteConfig } from "@/config/site";
+import { lockPageScroll } from "@/lib/client/smooth-scroll";
 
 /** Full-screen menu for small screens. Closes itself whenever the route changes. */
 export function MobileMenu() {
@@ -18,12 +19,11 @@ export function MobileMenu() {
 
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const unlock = lockPageScroll();
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpenedOn(null);
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = prev;
+      unlock();
       window.removeEventListener("keydown", onKey);
     };
   }, [open]);

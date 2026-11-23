@@ -13,6 +13,7 @@ import {
   type ShelfEntry,
   type ShelfStatus,
 } from "./library";
+import { activityStore } from "./streaks";
 import type { Level } from "@/lib/data/types";
 
 /**
@@ -47,6 +48,8 @@ type HighlightRow = {
   created_at: string;
 };
 
+type ReadingDayRow = { day: string; words: number };
+
 const PUSH_DELAY = 1500;
 
 /** While true, nothing is pushed. Set before signing out so clearing local data can never delete cloud data. */
@@ -65,6 +68,8 @@ export function startSync(sb: SupabaseClient, userId: string): () => void {
     books: new Set<string>(),
     bookmarks: new Set<string>(),
     highlights: new Set<string>(),
+    /** Words last known to be stored for each reading day. */
+    days: new Map<string, number>(),
   };
   let ready = false;
   let pushing = false;
@@ -79,7 +84,7 @@ export function startSync(sb: SupabaseClient, userId: string): () => void {
       idToSlug.set(b.id, b.slug);
     }
 
-    const [ub, bm, hl] = await Promise.all([
+    const [ub, bm, hl, rd] = await Promise.all([
       sb
         .from("user_books")
         .select("book_id,status,last_chapter,last_paragraph,level,updated_at")
@@ -92,6 +97,7 @@ export function startSync(sb: SupabaseClient, userId: string): () => void {
         .from("highlights")
         .select("id,book_id,chapter_idx,paragraph_idx,quote,color,note,created_at")
         .eq("user_id", userId),
+      sb.from("reading_days").select("day,words").eq("user_id", userId),
     ]);
     if (stopped) return;
 
@@ -160,6 +166,14 @@ export function startSync(sb: SupabaseClient, userId: string): () => void {
       } satisfies Highlight);
     }
     highlightStore.set(hls);
+
+    // reading days: keep the larger total for each day
+    const activity = { ...activityStore.get() };
+    for (const r of (rd.data ?? []) as ReadingDayRow[]) {
+      remote.days.set(r.day, r.words);
+      if ((activity[r.day] ?? 0) < r.words) activity[r.day] = r.words;
+    }
+    activityStore.set(activity);
   }
 
   async function push() {
@@ -251,6 +265,17 @@ export function startSync(sb: SupabaseClient, userId: string): () => void {
       if (goneHl.length)
         await sb.from("highlights").delete().eq("user_id", userId).in("id", goneHl);
       remote.highlights = localHlIds;
+
+      // reading days: only ever grow, never deleted
+      const changedDays = Object.entries(activityStore.get())
+        .filter(([day, words]) => words > (remote.days.get(day) ?? 0))
+        .map(([day, words]) => ({ user_id: userId, day, words }));
+      if (changedDays.length) {
+        const { error } = await sb
+          .from("reading_days")
+          .upsert(changedDays, { onConflict: "user_id,day" });
+        if (!error) for (const r of changedDays) remote.days.set(r.day, r.words);
+      }
     } catch (err) {
       console.error("[sync] push failed", err);
     } finally {
@@ -273,7 +298,13 @@ export function startSync(sb: SupabaseClient, userId: string): () => void {
       if (stopped) return;
       ready = true;
       await push();
-      for (const store of [shelfStore, progressStore, bookmarkStore, highlightStore]) {
+      for (const store of [
+        shelfStore,
+        progressStore,
+        bookmarkStore,
+        highlightStore,
+        activityStore,
+      ]) {
         unsubs.push(
           (store as { subscribe: (cb: () => void) => () => void }).subscribe(schedule),
         );

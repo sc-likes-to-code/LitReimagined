@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { BookCover } from "@/components/book/BookCover";
+import { ReadingRhythm } from "@/components/library/ReadingRhythm";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { useUser } from "@/lib/client/auth";
 import {
@@ -112,6 +113,8 @@ export function LibraryView({ books }: { books: BookSummary[] }) {
           </ButtonLink>
         </div>
       )}
+
+      {!isEmpty && <ReadingRhythm />}
 
       {continueReading.length > 0 && (
         <section className="mb-20">

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LevelSlider } from "@/components/reader/LevelSlider";
 import { Paragraph } from "@/components/reader/Paragraph";
 import { ReadAloudBar } from "@/components/reader/ReadAloudBar";
+import { StreakChip } from "@/components/reader/StreakChip";
 import { ReaderPrefsPanel } from "@/components/reader/ReaderPrefsPanel";
 import { SelectionToolbar } from "@/components/reader/SelectionToolbar";
 import { useTextSelection } from "@/components/reader/useTextSelection";
@@ -23,8 +24,14 @@ import {
   useReaderPrefs,
   type HighlightColor,
 } from "@/lib/client/library";
-import { LEVEL_LABELS, type Chapter, type ChapterSummary, type Level } from "@/lib/data/types";
+import {
+  LEVEL_LABELS,
+  type Chapter,
+  type ChapterSummary,
+  type Level,
+} from "@/lib/data/types";
 import { useReadAloud } from "@/lib/client/read-aloud";
+import { recordReading } from "@/lib/client/streaks";
 import { cn } from "@/lib/utils";
 
 // Loaded on demand: most readers never open the card maker.
@@ -125,6 +132,8 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
 
   /* ------------------------------------------------- progress + scroll bar */
   const restored = useRef(false);
+  const counted = useRef(new Set<string>());
+  const original = chapter.original;
 
   useEffect(() => {
     const root = articleRef.current;
@@ -143,15 +152,19 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
         const idx = Number((top.target as HTMLElement).dataset.row);
         setActivePara(idx);
         clearTimeout(timer);
-        timer = setTimeout(
-          () =>
-            saveProgress(book.slug, {
-              chapter: chapter.idx,
-              paragraph: idx,
-              level: prefs.level,
-            }),
-          900,
-        );
+        timer = setTimeout(() => {
+          saveProgress(book.slug, {
+            chapter: chapter.idx,
+            paragraph: idx,
+            level: prefs.level,
+          });
+          // Dwelling on a paragraph counts it toward today's reading, once per visit.
+          const key = `${chapter.idx}:${idx}`;
+          if (!counted.current.has(key)) {
+            counted.current.add(key);
+            recordReading(original[idx] ?? "");
+          }
+        }, 900);
       },
       { rootMargin: "-25% 0px -60% 0px" },
     );
@@ -161,7 +174,7 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
       clearTimeout(timer);
     };
     // Re-observe when the layout of rows changes (split/single).
-  }, [book.slug, chapter.idx, prefs.level, split, chapter.original.length]);
+  }, [book.slug, chapter.idx, prefs.level, split, original]);
 
   // Resume where the reader left off (once, same chapter only).
   useEffect(() => {
@@ -324,15 +337,18 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
             {chapters.length > 1 &&
               ` · ${chapters.findIndex((c) => c.idx === chapter.idx) + 1} of ${chapters.length}`}
           </p>
-          <button
-            type="button"
-            onClick={() => setShowPrefs((v) => !v)}
-            aria-expanded={showPrefs}
-            className="hairline hover:bg-surface flex h-10 items-center gap-2 rounded-full px-4 text-sm transition-colors"
-          >
-            <span className="font-display text-base leading-none">Aa</span>
-            <span className="hidden sm:inline">Settings</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <StreakChip />
+            <button
+              type="button"
+              onClick={() => setShowPrefs((v) => !v)}
+              aria-expanded={showPrefs}
+              className="hairline hover:bg-surface flex h-10 items-center gap-2 rounded-full px-4 text-sm transition-colors"
+            >
+              <span className="font-display text-base leading-none">Aa</span>
+              <span className="hidden sm:inline">Settings</span>
+            </button>
+          </div>
         </div>
       </header>
       {showPrefs && (

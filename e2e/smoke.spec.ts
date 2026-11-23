@@ -263,3 +263,50 @@ test("side-by-side view labels each column with its version", async ({ page, isM
   await expect(header).toContainText("Original version");
   await expect(header).toContainText("Modern version");
 });
+
+/** Local calendar date key n days before today, matching the app's own day keys. */
+const daysAgo = (n: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+test("reading for a while records words for today", async ({ page }) => {
+  await page.goto("/read/alices-adventures-in-wonderland/1", { waitUntil: "networkidle" });
+  await page.waitForTimeout(1300);
+  await page.locator('[data-row="3"]').scrollIntoViewIfNeeded();
+  await page.locator('[data-row="3"]').evaluate((el) => el.scrollIntoView({ block: "center" }));
+  await page.waitForTimeout(1500);
+  const words = await page.evaluate(() => {
+    const raw = localStorage.getItem("lr:activity:v1");
+    return raw ? (Object.values(JSON.parse(raw)) as number[]).reduce((a, b) => a + b, 0) : 0;
+  });
+  expect(words).toBeGreaterThan(20);
+});
+
+test("the library shows the streak and calendar from reading history", async ({ page }) => {
+  const activity = { [daysAgo(0)]: 400, [daysAgo(1)]: 220, [daysAgo(2)]: 180, [daysAgo(5)]: 900 };
+  await page.addInitScript((a) => {
+    localStorage.setItem("lr:activity:v1", JSON.stringify(a));
+    localStorage.setItem(
+      "lr:shelf:v1",
+      JSON.stringify({ dracula: { status: "reading", updatedAt: Date.now() } }),
+    );
+  }, activity);
+  await page.goto("/library", { waitUntil: "networkidle" });
+
+  const section = page.getByRole("region", { name: "Reading rhythm" });
+  await expect(section).toContainText("Today is done");
+  await expect(section.getByText("Day streak").locator("..").getByText("3", { exact: true })).toBeVisible();
+  await expect(section.getByText("Days read").locator("..").getByText("4", { exact: true })).toBeVisible();
+  await expect(section.getByRole("img", { name: /Reading calendar/ })).toBeVisible();
+});
+
+test("the reader header shows the flame once there is a streak", async ({ page }) => {
+  await page.addInitScript((a) => localStorage.setItem("lr:activity:v1", JSON.stringify(a)), {
+    [daysAgo(0)]: 300,
+    [daysAgo(1)]: 300,
+  });
+  await page.goto("/read/alices-adventures-in-wonderland/1", { waitUntil: "networkidle" });
+  await expect(page.getByRole("link", { name: /2-day reading streak/ })).toBeVisible();
+});

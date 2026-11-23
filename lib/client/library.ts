@@ -2,6 +2,7 @@
 
 import type { Level } from "@/lib/data/types";
 import { createStore, useStore } from "./store";
+import { clearActivity } from "./streaks";
 
 export type ShelfStatus = "want" | "reading" | "finished";
 
@@ -119,4 +120,5 @@ export function clearLibraryStores() {
   progressStore.set({});
   bookmarkStore.set([]);
   highlightStore.set([]);
+  clearActivity();
 }

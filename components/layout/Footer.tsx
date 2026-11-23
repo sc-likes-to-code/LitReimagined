@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SprigDoodle } from "@/components/brand/Doodles";
+import { LanternsDoodle } from "@/components/brand/Doodles";
 import { Logo } from "@/components/brand/Logo";
 import { siteConfig } from "@/config/site";
 
@@ -49,9 +49,10 @@ export function Footer() {
         </div>
       </div>
       <div className="border-line border-t">
-        <div className="container-page flex items-center justify-between gap-4 py-6">
+        <div className="container-page relative flex min-h-32 items-center py-6">
           <p className="text-faint text-xs">© LitReimagined. Made for readers.</p>
-          <SprigDoodle className="w-24 shrink-0" />
+          {/* lanterns hanging from the line above */}
+          <LanternsDoodle className="absolute top-0 right-4 w-52 sm:right-8" />
         </div>
       </div>
     </footer>

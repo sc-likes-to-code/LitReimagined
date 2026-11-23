@@ -421,3 +421,36 @@ export function KidReadingDoodle(props: Props) {
     </Draw>
   );
 }
+
+/** One lantern hanging by a short cord from y = 0, drawn around x = 0. */
+function Lantern({ x, cord, scale }: { x: number; cord: number; scale: number }) {
+  const soft = { fill: "currentColor", fillOpacity: 0.06 } as const;
+  return (
+    <m.g transform={`translate(${x} ${cord}) scale(${scale})`}>
+      <m.path variants={fine} d={`M0 ${-cord / scale}V2`} />
+      <m.path variants={stroke} d="M-4 8a4 4 0 1 1 8 0" />
+      <m.path variants={stroke} d="M-6 12h12l9 10h-30Z" {...soft} />
+      <m.path variants={stroke} d="M-13 22c-3 12-3 24-1 36h28c2-12 2-24-1-36" {...soft} />
+      <m.path variants={fine} d="M0 22v36M-13.5 31h27M-14 49h28" />
+      <m.path variants={stroke} d="M-15 58h30l-3 6h-24Z" />
+      <m.path
+        variants={stroke}
+        d="M0 52c-5-6-4-14 0-21 4 7 5 15 0 21Z"
+        fill="currentColor"
+        fillOpacity={0.12}
+      />
+      <m.path variants={fine} d="M-22 38h-6M22 38h6M-19 26l-5-4M19 26l5-4" />
+    </m.g>
+  );
+}
+
+/** A small cluster of lanterns hanging together from a line above them. */
+export function LanternsDoodle(props: Props) {
+  return (
+    <Draw viewBox="0 0 200 112" stagger={0.1} {...props}>
+      <Lantern x={44} cord={6} scale={1} />
+      <Lantern x={102} cord={28} scale={0.84} />
+      <Lantern x={156} cord={12} scale={0.92} />
+    </Draw>
+  );
+}

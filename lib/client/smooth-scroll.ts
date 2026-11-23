@@ -26,3 +26,23 @@ export function scrollToId(id: string): boolean {
   } else el.scrollIntoView({ behavior: "auto", block: "start" });
   return true;
 }
+
+/** Scrolls to the very top, through the smooth scroller when there is one. */
+export function scrollToTop(immediate = false) {
+  if (instance) instance.scrollTo(0, { immediate });
+  else window.scrollTo({ top: 0, behavior: immediate ? "auto" : "smooth" });
+}
+
+let topPending = false;
+
+/** Remembers that the next page should open at its very top (Next keeps the old scroll position otherwise). */
+export function requestTopOnArrival() {
+  topPending = true;
+}
+
+/** True once after `requestTopOnArrival`. */
+export function takePendingTop(): boolean {
+  const was = topPending;
+  topPending = false;
+  return was;
+}

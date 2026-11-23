@@ -1,11 +1,22 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import Lenis from "lenis";
-import { setSmoothScroller } from "@/lib/client/smooth-scroll";
+import {
+  scrollToTop,
+  setSmoothScroller,
+  takePendingTop,
+} from "@/lib/client/smooth-scroll";
 
 /** Lenis smooth scrolling on its own animation frame loop. Disabled for reduced motion. */
 export function SmoothScroll() {
+  const pathname = usePathname();
+  // Arriving through the logo means the very top, whatever scroll position Next carried over.
+  useEffect(() => {
+    if (takePendingTop()) scrollToTop(true);
+  }, [pathname]);
+
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 

@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { KeyDoodle, StarsDoodle } from "@/components/brand/Doodles";
+import { HomeLink } from "@/components/layout/HomeLink";
 import { Logo } from "@/components/brand/Logo";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -16,9 +16,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           }}
         />
         <div className="relative flex h-full flex-col justify-between p-14">
-          <Link href="/" aria-label="LitReimagined home">
+          <HomeLink aria-label="LitReimagined home">
             <Logo />
-          </Link>
+          </HomeLink>
           <StarsDoodle className="absolute top-24 right-12 w-44" delay={0.4} />
           <KeyDoodle className="absolute right-12 bottom-48 w-56" delay={0.8} />
           <figure>
@@ -34,9 +34,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       </aside>
 
       <div className="flex flex-col items-center justify-center px-6 py-16">
-        <Link href="/" aria-label="LitReimagined home" className="mb-12 lg:hidden">
+        <HomeLink aria-label="LitReimagined home" className="mb-12 lg:hidden">
           <Logo />
-        </Link>
+        </HomeLink>
         {children}
       </div>
     </main>

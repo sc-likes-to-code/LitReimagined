@@ -94,6 +94,34 @@ test("'Try the slider' scrolls to the demo every time, not just the first", asyn
   }
 });
 
+test("the logo always takes you to the very top of the home page", async ({ page }) => {
+  test.setTimeout(120_000);
+  const logo = () => page.getByRole("link", { name: "LitReimagined home" }).first();
+  const atTop = () =>
+    expect.poll(() => page.evaluate(() => Math.round(scrollY))).toBeLessThan(3);
+
+  // From far down the home page.
+  await page.goto("/", { waitUntil: "networkidle" });
+  await page.evaluate(() => window.scrollTo(0, 2500));
+  await page.waitForTimeout(600);
+  await logo().click();
+  await atTop();
+
+  // From the middle of another page, and from one with a hash.
+  await page.goto("/explore", { waitUntil: "networkidle" });
+  await page.evaluate(() => window.scrollTo(0, 400));
+  await page.waitForTimeout(600);
+  await logo().click();
+  await expect(page).toHaveURL(/\/$/);
+  await atTop();
+
+  await page.getByRole("link", { name: "Try the slider" }).click();
+  await expect.poll(() => page.evaluate(() => Math.round(scrollY))).toBeGreaterThan(500);
+  await logo().click();
+  await atTop();
+  await expect(page).toHaveURL(/\/$/);
+});
+
 test("explore filters update the URL and the results", async ({ page }) => {
   await page.goto("/explore", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "Gothic", exact: true }).first().click();

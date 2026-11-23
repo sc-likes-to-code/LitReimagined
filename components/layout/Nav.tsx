@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HomeLink } from "@/components/layout/HomeLink";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { AccountButton } from "@/components/layout/AccountButton";
@@ -13,9 +14,9 @@ export function Nav() {
         aria-label="Primary"
         className="glass mx-auto flex h-[var(--nav-h)] max-w-6xl items-center justify-between rounded-full pr-3 pl-5 shadow-[0_10px_40px_-18px_rgb(var(--shadow-color)/0.6)]"
       >
-        <Link href="/" aria-label="LitReimagined home" className="shrink-0">
+        <HomeLink aria-label="LitReimagined home" className="shrink-0">
           <Logo />
-        </Link>
+        </HomeLink>
 
         <ul className="hidden items-center gap-1 md:flex">
           {siteConfig.nav.map((item) => (

@@ -39,3 +39,6 @@ supabase/.branches/
 # Generated AI batch output (large; lives in the database)
 /scripts/.cache/
 /data/raw/
+
+# Internal working plan (local only)
+/plan.md

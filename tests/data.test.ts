@@ -43,7 +43,7 @@ describe("filterBooks", () => {
 describe("demo repository", () => {
   it("resolves books, chapters, authors and collections", async () => {
     expect((await repo.getBook("moby-dick"))?.author.name).toBe("Herman Melville");
-    expect((await repo.getChapter("dracula", 0))?.original.length).toBeGreaterThan(0);
+    expect((await repo.getChapter("dracula", 1))?.original.length).toBeGreaterThan(0);
     expect(await repo.getBook("nope")).toBeNull();
     expect((await repo.getAuthor("homer"))?.books).toHaveLength(1);
     expect((await repo.listCollections()).every((c) => c.books.length > 0)).toBe(true);

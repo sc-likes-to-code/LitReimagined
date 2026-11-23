@@ -77,7 +77,7 @@ export const demoRepository: Repository = {
       chapters: c
         ? [
             {
-              idx: 0,
+              idx: 1,
               title: c.title,
               wordCount: c.original.join(" ").split(/\s+/).length,
             },
@@ -88,10 +88,10 @@ export const demoRepository: Repository = {
 
   async getChapter(bookSlug, idx): Promise<Chapter | null> {
     const c = demoContent[bookSlug];
-    if (!c || idx !== 0) return null;
+    if (!c || idx !== 1) return null;
     return {
       bookSlug,
-      idx: 0,
+      idx: 1,
       title: c.title,
       original: c.original,
       translations: c.levels,

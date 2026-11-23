@@ -48,7 +48,7 @@ export default async function Home() {
     repo.listBooks({ sort: "featured" }),
     repo.listBooks({ sort: "title" }),
     repo.listCollections(),
-    repo.getChapter("pride-and-prejudice", 0),
+    repo.getChapter("pride-and-prejudice", 1),
   ]);
 
   const heroBooks = featured.slice(0, 5);

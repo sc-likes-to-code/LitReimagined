@@ -454,3 +454,55 @@ export function LanternsDoodle(props: Props) {
     </Draw>
   );
 }
+
+/** A broad old tree with a pool of shade on the ground beside it. */
+export function TreeDoodle(props: Props) {
+  const soft = { fill: "currentColor", fillOpacity: 0.05 } as const;
+  // Hatching for the shadow the canopy throws to the right.
+  const hatch = Array.from({ length: 11 }, (_, i) => {
+    const x = 118 + i * 9;
+    return `M${x} 283l-5 9`;
+  }).join("");
+  return (
+    <Draw viewBox="0 0 230 300" stagger={0.07} {...props}>
+      {/* ground and shade */}
+      <m.path variants={fine} d="M14 292c60 4 150 4 214-2" />
+      <m.path variants={fine} d="M112 284c30-6 80-6 110 0" />
+      <m.path variants={fine} d={hatch} />
+
+      {/* trunk, roots and bark */}
+      <m.path variants={stroke} d="M96 288C100 256 92 224 96 194c2-20-2-34-6-52" />
+      <m.path variants={stroke} d="M128 288c-4-32 4-62-2-92-2-20 4-36 10-54" />
+      <m.path variants={stroke} d="M96 288c-8 2-16 3-26 3M128 288c8 2 18 3 28 3" />
+      <m.path
+        variants={fine}
+        d="M108 276c-2-20 2-40 0-60M117 268c2-18-2-34 0-52M111 204c-3-12 0-24-2-36"
+      />
+
+      {/* limbs */}
+      <m.path variants={stroke} d="M94 186C76 174 62 166 46 154" />
+      <m.path variants={stroke} d="M92 156C80 144 72 132 62 116" />
+      <m.path variants={stroke} d="M128 180c18-12 32-18 48-30" />
+      <m.path variants={stroke} d="M132 154c10-14 18-24 26-40" />
+      <m.path variants={stroke} d="M110 146c-2-22 0-38 2-56" />
+
+      {/* canopy */}
+      <m.path
+        variants={stroke}
+        d="M34 126C16 118 14 90 36 84 32 60 58 44 78 54 84 30 120 22 138 42c20-12 52 4 46 28 24 8 22 42 2 50 4 18-26 28-44 18-14 12-46 12-60 0-20 10-46 6-48-12Z"
+        {...soft}
+      />
+      <m.path
+        variants={fine}
+        d="M62 82q8-6 14 0M96 62q8-6 14 0M134 70q8-6 14 0M158 96q8-6 14 0M52 108q8-6 14 0M92 104q8-6 14 0M128 112q8-6 14 0M80 130q8-6 14 0M150 128q8-6 14 0M112 86q8-6 14 0M70 58q6-4 11 0M164 62q6-4 11 0"
+      />
+
+      {/* leaves drifting down */}
+      <m.path
+        variants={stroke}
+        d="M36 174c4-7 11-7 14 0-4 7-11 7-14 0ZM190 196c4-7 11-7 14 0-4 7-11 7-14 0ZM172 236c4-7 11-7 14 0-4 7-11 7-14 0Z"
+      />
+      <m.path variants={fine} d="M34 174h18M188 196h18M170 236h18" />
+    </Draw>
+  );
+}

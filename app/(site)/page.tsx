@@ -7,10 +7,10 @@ import {
   MothDoodle,
   OpenBookDoodle,
   OrbitDoodle,
-  QuillDoodle,
   SpectaclesDoodle,
   SprigDoodle,
   StarsDoodle,
+  TreeDoodle,
   TypewriterDoodle,
 } from "@/components/brand/Doodles";
 import { HeroCovers } from "@/components/home/HeroCovers";
@@ -85,14 +85,14 @@ export default async function Home() {
               "radial-gradient(closest-side, rgb(255 90 54 / 0.35), rgb(76 201 240 / 0.12) 55%, transparent)",
           }}
         />
-        <QuillDoodle
-          className="absolute top-40 left-[4%] hidden w-28 -rotate-12 xl:block"
-          delay={0.3}
-        />
-        <KidReadingDoodle
-          className="absolute top-[17.5rem] left-[8%] hidden w-64 xl:block"
-          delay={0.5}
-        />
+        {/* a reader in the shade of an old tree */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-[7.5rem] left-[1.5%] z-0 hidden items-end xl:flex"
+        >
+          <TreeDoodle className="h-[17rem] w-auto" delay={0.2} />
+          <KidReadingDoodle className="mb-2 -ml-14 w-56 shrink-0" delay={0.9} />
+        </div>
         <OrbitDoodle
           className="absolute top-52 right-[5%] hidden w-32 xl:block"
           delay={0.5}

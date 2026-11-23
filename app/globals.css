@@ -112,10 +112,12 @@ body {
   color: #fff;
 }
 
-:focus-visible {
-  outline: 2px solid var(--circuit);
-  outline-offset: 3px;
-  border-radius: 6px;
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--circuit);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
 }
 
 /* Film grain overlay: one cheap fixed layer, no repaint cost */

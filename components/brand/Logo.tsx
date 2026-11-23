@@ -56,11 +56,11 @@ export function Wordmark({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "font-display text-[1.35rem] leading-none tracking-tight text-ink",
+        "font-display text-ink text-[1.35rem] leading-none tracking-tight",
         className,
       )}
     >
-      Lit<em className="font-normal text-gradient-ember italic">Reimagined</em>
+      Lit<em className="text-gradient-ember font-normal italic">Reimagined</em>
     </span>
   );
 }

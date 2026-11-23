@@ -6,7 +6,10 @@ type Theme = "ink" | "paper";
 
 function subscribe(cb: () => void) {
   const obs = new MutationObserver(cb);
-  obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  obs.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
   return () => obs.disconnect();
 }
 
@@ -32,7 +35,14 @@ export function ThemeToggle() {
       aria-label={`Switch to ${next === "ink" ? "dark" : "light"} theme`}
       className="hairline text-muted hover:text-ink grid size-10 place-items-center rounded-full transition-colors"
     >
-      <svg viewBox="0 0 24 24" className="size-[18px]" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+      <svg
+        viewBox="0 0 24 24"
+        className="size-[18px]"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      >
         {theme === "ink" ? (
           <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" />
         ) : (

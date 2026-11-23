@@ -10,8 +10,8 @@ export function Footer() {
           <Logo />
           <p className="text-muted mt-5 text-sm leading-relaxed">{siteConfig.tagline}</p>
           <p className="text-faint mt-6 text-xs leading-relaxed">
-            Original texts are public domain, courtesy of Project Gutenberg. Modern versions are
-            AI-assisted and clearly labelled.
+            Original texts are public domain, courtesy of Project Gutenberg. Modern
+            versions are AI-assisted and clearly labelled.
           </p>
         </div>
         <div>
@@ -29,9 +29,21 @@ export function Footer() {
         <div>
           <p className="eyebrow mb-4">Company</p>
           <ul className="text-muted space-y-2.5 text-sm">
-            <li><Link href="/about" className="hover:text-ink transition-colors">About</Link></li>
-            <li><Link href="/privacy" className="hover:text-ink transition-colors">Privacy</Link></li>
-            <li><Link href="/terms" className="hover:text-ink transition-colors">Terms</Link></li>
+            <li>
+              <Link href="/about" className="hover:text-ink transition-colors">
+                About
+              </Link>
+            </li>
+            <li>
+              <Link href="/privacy" className="hover:text-ink transition-colors">
+                Privacy
+              </Link>
+            </li>
+            <li>
+              <Link href="/terms" className="hover:text-ink transition-colors">
+                Terms
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

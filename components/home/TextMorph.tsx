@@ -5,17 +5,20 @@ import { AnimatePresence, motion } from "motion/react";
 
 const PAIRS = [
   {
-    original: "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
+    original:
+      "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
     modern: "Everyone knows that a rich, single guy is basically shopping for a wife.",
     source: "Pride and Prejudice",
   },
   {
-    original: "Whether I shall turn out to be the hero of my own life, these pages must show.",
+    original:
+      "Whether I shall turn out to be the hero of my own life, these pages must show.",
     modern: "Am I the main character of my own story? Read on and find out.",
     source: "David Copperfield",
   },
   {
-    original: "I am no bird; and no net ensnares me: I am a free human being with an independent will.",
+    original:
+      "I am no bird; and no net ensnares me: I am a free human being with an independent will.",
     modern: "I'm not a trapped bird. I'm a free person, and I make my own choices.",
     source: "Jane Eyre",
   },
@@ -46,8 +49,12 @@ export function TextMorph() {
       <div className="mb-5 flex items-center justify-between">
         <span className="eyebrow">{modern ? "Modern" : "Original"}</span>
         <span className="flex gap-1.5" aria-hidden>
-          <span className={`h-1.5 w-8 rounded-full transition-colors duration-500 ${!modern ? "bg-ember" : "bg-line-strong"}`} />
-          <span className={`h-1.5 w-8 rounded-full transition-colors duration-500 ${modern ? "bg-circuit" : "bg-line-strong"}`} />
+          <span
+            className={`h-1.5 w-8 rounded-full transition-colors duration-500 ${!modern ? "bg-ember" : "bg-line-strong"}`}
+          />
+          <span
+            className={`h-1.5 w-8 rounded-full transition-colors duration-500 ${modern ? "bg-circuit" : "bg-line-strong"}`}
+          />
         </span>
       </div>
       <div className="min-h-[7.5rem]" aria-live="polite">

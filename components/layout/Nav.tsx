@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { CommandPalette } from "@/components/layout/CommandPalette";
 import { siteConfig } from "@/config/site";
 
 export function Nav() {
@@ -28,6 +29,7 @@ export function Nav() {
         </ul>
 
         <div className="flex items-center gap-2">
+          <CommandPalette />
           <ThemeToggle />
           <Link
             href="/login"

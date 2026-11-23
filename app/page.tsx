@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { ButtonLink } from "@/components/ui/Button";
 import { TextMorph } from "@/components/home/TextMorph";
 
 export default function Home() {
@@ -25,18 +25,12 @@ export default function Home() {
           original. Slide from the author&apos;s own words to a fresh, modern voice.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/explore"
-            className="from-ember to-ember-2 rounded-full bg-gradient-to-r px-7 py-3.5 font-medium text-white shadow-[0_12px_40px_-12px_var(--ember)] transition-transform hover:-translate-y-0.5"
-          >
+          <ButtonLink href="/explore" size="lg">
             Start reading
-          </Link>
-          <Link
-            href="/how-it-works"
-            className="hairline hover:bg-surface rounded-full px-7 py-3.5 font-medium transition-colors"
-          >
+          </ButtonLink>
+          <ButtonLink href="/how-it-works" variant="secondary" size="lg">
             How it works
-          </Link>
+          </ButtonLink>
         </div>
         <div className="mt-20">
           <TextMorph />

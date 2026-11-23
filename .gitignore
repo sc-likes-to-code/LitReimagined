@@ -42,3 +42,13 @@ supabase/.branches/
 
 # Internal working plan (local only)
 /plan.md
+
+# AI agent instruction files (local only)
+AGENTS.md
+agents.md
+CLAUDE.md
+GEMINI.md
+.claude/
+.cursor/
+.cursorrules
+.github/copilot-instructions.md

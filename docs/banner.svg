@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" role="img" aria-label="LitReimagined: where classics meet modern brilliance">
+  <defs>
+    <linearGradient id="ember" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF9A3C"/><stop offset="1" stop-color="#FF4B2E"/>
+    </linearGradient>
+    <linearGradient id="word" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FF5A36"/><stop offset="1" stop-color="#FF9A3C"/>
+    </linearGradient>
+    <radialGradient id="glowL" cx="0.15" cy="0.2" r="0.6">
+      <stop offset="0" stop-color="#FF5A36" stop-opacity=".28"/><stop offset="1" stop-color="#FF5A36" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowR" cx="0.9" cy="0.85" r="0.55">
+      <stop offset="0" stop-color="#4CC9F0" stop-opacity=".22"/><stop offset="1" stop-color="#4CC9F0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="420" rx="24" fill="#0E0C14"/>
+  <rect width="1200" height="420" rx="24" fill="url(#glowL)"/>
+  <rect width="1200" height="420" rx="24" fill="url(#glowR)"/>
+  <rect x=".5" y=".5" width="1199" height="419" rx="23.5" fill="none" stroke="#F3EBDD" stroke-opacity=".12"/>
+
+  <!-- bookmark mark -->
+  <g transform="translate(96 104) scale(2.6)">
+    <path d="M9 3h30a5 5 0 0 1 5 5v53.2a1 1 0 0 1-1.6.8L24 48.4 5.6 62a1 1 0 0 1-1.6-.8V8a5 5 0 0 1 5-5Z" fill="url(#ember)"/>
+    <path d="M34.5 12C23 13.5 16.5 22.5 15.5 36c8.5-1.6 16.8-8 19-24Z" fill="#0E0C14" opacity=".92"/>
+    <path d="M15.5 40.5 30.5 18" stroke="#FF9A3C" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+    <path d="M13 46h6l3-3.5h5" stroke="#4CC9F0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <circle cx="29.5" cy="42.5" r="1.8" fill="#4CC9F0"/>
+  </g>
+
+  <!-- wordmark -->
+  <text x="290" y="205" font-family="Georgia, 'Times New Roman', serif" font-size="92" font-weight="600" fill="#F3EBDD">Lit<tspan font-style="italic" fill="url(#word)">Reimagined</tspan></text>
+  <text x="294" y="262" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-style="italic" fill="#A79F92">Where classics meet modern brilliance.</text>
+
+  <!-- original / modern slider -->
+  <g transform="translate(294 306)">
+    <text x="0" y="0" font-family="Georgia, serif" font-size="20" fill="#FF8A5C">It is a truth universally acknowledged…</text>
+    <line x1="0" y1="18" x2="560" y2="18" stroke="#F3EBDD" stroke-opacity=".18"/>
+    <circle cx="300" cy="18" r="7" fill="#FF9A3C"/>
+    <text x="0" y="52" font-family="Georgia, serif" font-size="20" fill="#5CD0F2">Everyone knows that a rich single man must be looking for a wife.</text>
+  </g>
+
+  <!-- sparks -->
+  <g fill="#FF9A3C">
+    <circle cx="1080" cy="80" r="3" opacity=".8"/><circle cx="1120" cy="130" r="2" opacity=".6"/>
+    <circle cx="1040" cy="150" r="1.6" opacity=".5"/>
+  </g>
+  <g fill="#4CC9F0"><circle cx="1100" cy="340" r="2.4" opacity=".7"/><circle cx="1060" cy="372" r="1.6" opacity=".5"/></g>
+</svg>

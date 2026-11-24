@@ -1,47 +1,133 @@
-# LitReimagined
+<div align="center">
 
-> Where classics meet modern brilliance.
+<img src="docs/banner.svg" alt="LitReimagined: where classics meet modern brilliance" width="100%" />
 
-A reading room for public-domain classics, re-voiced in modern language and shown beside the original. Slide between the author's own words and a light, modern or contemporary retelling; tap archaic words; highlight and annotate; ask an AI quill to rewrite or explain a passage.
+<br />
 
-Built with **Next.js 16** (App Router, Cache Components), **TypeScript**, **Tailwind CSS 4**, **Supabase** (Postgres, Auth, pgvector) and the **Gemini API**.
+*A reading room for the great old books, with the lamp turned up.*
 
-## Quick start
+<br />
+
+![Next.js 16](https://img.shields.io/badge/Next.js-16-0E0C14?style=flat-square&logo=nextdotjs&logoColor=F3EBDD)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-0E0C14?style=flat-square&logo=typescript&logoColor=4CC9F0)
+![Tailwind](https://img.shields.io/badge/Tailwind-4-0E0C14?style=flat-square&logo=tailwindcss&logoColor=4CC9F0)
+![Supabase](https://img.shields.io/badge/Supabase-optional-0E0C14?style=flat-square&logo=supabase&logoColor=9DB39A)
+![Gemini](https://img.shields.io/badge/Gemini-optional-0E0C14?style=flat-square&logo=googlegemini&logoColor=FF9A3C)
+![Demo mode](https://img.shields.io/badge/runs_with-zero_keys-FF5A36?style=flat-square)
+
+</div>
+
+---
+
+## ✦ The idea
+
+Classics are wonderful and, sometimes, a wall. **LitReimagined** keeps the author's own words on one side and a fresh retelling on the other, then lets you **slide between them**.
+
+> *It is a truth universally acknowledged…*
+> &nbsp;&nbsp;&nbsp;&nbsp;↕ slide ↕
+> *Everyone knows that a rich single man must be looking for a wife.*
+
+Read the original when you feel brave. Slide toward modern when the sentence runs away from you. Nothing is lost; the book is still the book.
+
+## ✦ What you can do
+
+| | |
+|---|---|
+| 🪶 **Slide the voice** | Move from the original to a *Light*, *Modern* or *Contemporary* retelling, side by side with the source text. |
+| 🔍 **Tap an old word** | Archaic words open a small, per-book glossary. No tab-switching, no dictionary rabbit holes. |
+| 🖍 **Highlight & annotate** | Mark passages, keep notes, turn a favourite line into a quote card. |
+| ✒️ **Ask the quill** | An AI companion that rewrites or explains a passage. Its output is always labelled as AI. |
+| 🧭 **Find your next book** | Describe a mood; semantic search (pgvector) points you to a shelf. |
+| 🔥 **Keep a reading rhythm** | Streaks, a personal library and read-aloud, for the long evenings. |
+| 🌗 **Night & parchment** | Ink `#0E0C14` after dark, Paper `#F4ECDD` by day. |
+
+## ✦ Step inside
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000
+npm run dev        # → http://localhost:3000
 ```
 
-No keys are needed to run it. Without Supabase and Gemini keys the app runs in **demo mode**: twelve classics with sample chapters, a mock AI, and reading data saved in your browser. Add real keys later and it switches over with no code changes (see [docs/going-live.md](docs/going-live.md)).
+**No keys needed.** Without Supabase and Gemini credentials the app opens in **demo mode**: twelve classics with sample chapters, a mock quill, and your reading data kept in the browser. Add real keys later and it switches over with no code changes. See [docs/going-live.md](docs/going-live.md).
 
-## Scripts
+Copy `.env.example` to `.env.local` when you're ready. Empty or placeholder values simply mean "not configured".
+
+## ✦ The shelf (demo library)
+
+*Pride and Prejudice* · *Frankenstein* · *Dracula* · *Jane Eyre* · *Wuthering Heights* · *Great Expectations* · *The Picture of Dorian Gray* · *Crime and Punishment* · *Moby-Dick* · *Alice's Adventures in Wonderland* · *Romeo and Juliet* · *The Odyssey*
+
+## ✦ Behind the curtain
+
+```
+app/            routes: (site) pages · (auth) sign-in · read/ the immersive reader · api/ai/* live AI
+components/     reader, book, brand doodles, motion, layout
+lib/data/       the repository layer: Supabase when configured, bundled demo data otherwise
+lib/ai/         the AI gateway: validation, shared cache, daily allowances, circuit breaker, Gemini or demo
+lib/client/     browser stores for guest data and account sync
+scripts/        the content pipeline
+supabase/       database migrations
+config/         site and AI settings (models and limits are env-tunable)
+```
+
+Pages read through a single interface, so the app quietly falls back to demo data if the database is empty or unreachable. The AI gateway guards the quill with per-visitor and per-network allowances and a site-wide circuit breaker.
+
+## ✦ Scripts
 
 | Command | What it does |
 |---|---|
-| `npm run dev` / `build` / `start` | Run, build and serve the app |
-| `npm run typecheck` / `lint` / `test` | Type check, lint and unit tests |
+| `npm run dev` · `build` · `start` | Run, build and serve |
+| `npm run typecheck` · `lint` · `test` | Types, lint, unit tests |
+| `npm run test:e2e` | Playwright end-to-end and accessibility checks |
 | `npm run content:seed` | Load authors, books and collections into Supabase |
-| `npm run content:ingest` | Download and split the books from Project Gutenberg (`-- --dry-run` previews offline) |
+| `npm run content:ingest` | Fetch and split books from Project Gutenberg (`-- --dry-run` previews offline) |
 | `npm run content:translate` | Generate Light / Modern / Contemporary versions (`-- --mock`, `--levels 2`, `--book <slug>`) |
 | `npm run content:glossary` | Build per-book glossaries |
 | `npm run content:embed` | Create search embeddings for "find my next book" |
 | `npm run content:status` | Show pipeline progress |
 | `npm run content:revalidate` | Refresh the live site's cached catalogue |
 
-## How it fits together
+## ✦ Look & feel
 
-- `app/` routes: `(site)` pages with navigation, `(auth)` sign-in flows, `read/` the immersive reader, `api/ai/*` live AI endpoints.
-- `lib/data/` the **repository layer**: pages read through one interface, backed by Supabase when configured and by bundled demo data otherwise (it also falls back if the database is empty or unreachable).
-- `lib/ai/` the **AI gateway**: validation, shared cache, per-visitor and per-network daily allowances, a site-wide circuit breaker, and Gemini or demo providers.
-- `lib/client/` browser-side stores for guest data and account sync.
-- `scripts/` the content pipeline. `supabase/migrations/` the database schema.
-- `config/` site and AI settings. Models and limits can be changed with environment variables.
+<table>
+<tr>
+<td width="50%" valign="top">
 
-## Environment
+**Palette**
 
-Copy `.env.example` to `.env.local`. Empty or placeholder values mean "not configured" and keep the app in demo mode.
+| | |
+|---|---|
+| Ember | `#FF5A36` → `#FF9A3C` |
+| Circuit *(AI, live)* | `#4CC9F0` |
+| Blush | `#E9B8A6` |
+| Dusty | `#8FA9C4` |
+| Sage | `#9DB39A` |
+| Ink · Paper | `#0E0C14` · `#F4ECDD` |
 
-## Content and licensing
+</td>
+<td width="50%" valign="top">
 
-Original texts are public domain and come from Project Gutenberg. Modern versions are AI-assisted adaptations and are labelled as such in the app.
+**Type & voice**
+
+- **Fraunces** for display
+- **Inter** for the interface
+- **Newsreader** for reading
+
+Warm, literate, a little playful, never gimmicky. More in [docs/brand.md](docs/brand.md).
+
+</td>
+</tr>
+</table>
+
+The mark is an ember bookmark holding a quill whose tip sparks a small circuit line: classic craft, modern intelligence.
+
+## ✦ Texts & honesty
+
+The original texts are public domain, courtesy of [Project Gutenberg](https://www.gutenberg.org). The modern versions are **AI-assisted adaptations** and are labelled as such everywhere in the app.
+
+<div align="center">
+
+<br />
+
+*Turn the page. The old books are waiting, and they've been practising their small talk.*
+
+</div>

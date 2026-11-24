@@ -8,12 +8,7 @@
 
 <br />
 
-![Next.js 16](https://img.shields.io/badge/Next.js-16-0E0C14?style=flat-square&logo=nextdotjs&logoColor=F3EBDD)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-0E0C14?style=flat-square&logo=typescript&logoColor=4CC9F0)
-![Tailwind](https://img.shields.io/badge/Tailwind-4-0E0C14?style=flat-square&logo=tailwindcss&logoColor=4CC9F0)
-![Supabase](https://img.shields.io/badge/Supabase-optional-0E0C14?style=flat-square&logo=supabase&logoColor=9DB39A)
-![Gemini](https://img.shields.io/badge/Gemini-optional-0E0C14?style=flat-square&logo=googlegemini&logoColor=FF9A3C)
-![Demo mode](https://img.shields.io/badge/runs_with-zero_keys-FF5A36?style=flat-square)
+**Next.js 16** · **TypeScript** · **Tailwind CSS 4** · **Supabase** · **Gemini** · *runs with zero keys*
 
 </div>
 

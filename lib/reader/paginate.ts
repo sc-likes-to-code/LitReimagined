@@ -213,3 +213,13 @@ export function viewForPara(views: BookView[], para: number): number {
   const after = views.findIndex((v) => v.first > para);
   return after === -1 ? views.length - 1 : Math.max(0, after - 1);
 }
+
+/**
+ * Index of the view to reopen when `para` is the first paragraph that was on screen.
+ * A paragraph that runs over a page break is the last one of one view and the first of the
+ * next, so the view that *starts* at it wins over the earlier view that merely ends with it.
+ */
+export function viewStartingAt(views: BookView[], para: number): number {
+  const i = views.findIndex((v) => v.first === para);
+  return i >= 0 ? i : viewForPara(views, para);
+}

@@ -491,7 +491,11 @@ export function Reader({ book, chapter, chapters, onAi }: Props) {
             onClick={() => updatePrefs({ view: split ? "single" : "split" })}
             aria-pressed={split}
             aria-label="Toggle side-by-side view"
-            title="Side by side (S)"
+            title={
+              hasModern
+                ? "Side by side (S)"
+                : "Side by side needs a modern version of this chapter"
+            }
             className={cn(
               "hidden size-9 shrink-0 place-items-center rounded-full transition-colors disabled:opacity-25 sm:grid",
               split ? "bg-ink text-bg" : "hover:bg-surface",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   removeHighlight,
   updateHighlightNote,
@@ -18,6 +18,46 @@ type Props = {
   highlights: Highlight[];
   onClose: () => void;
 };
+
+/**
+ * The note box. It saves on blur, and also when it goes away (click outside, scroll, switching
+ * to another highlight), because unmounting a focused field fires no blur event.
+ */
+function NoteField({ highlight, onClose }: { highlight: Highlight; onClose: () => void }) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const saved = useRef(highlight.note ?? "");
+  const id = highlight.id;
+
+  useEffect(() => {
+    const el = ref.current;
+    return () => {
+      if (el && el.value !== saved.current) updateHighlightNote(id, el.value);
+    };
+  }, [id]);
+
+  const save = (value: string) => {
+    if (value === saved.current) return;
+    saved.current = value;
+    updateHighlightNote(id, value);
+  };
+
+  return (
+    <textarea
+      ref={ref}
+      defaultValue={highlight.note ?? ""}
+      onBlur={(e) => save(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") {
+          save(e.currentTarget.value);
+          onClose();
+        }
+      }}
+      placeholder="Add a thought…"
+      rows={3}
+      className="bg-surface border-line w-full resize-none rounded-xl border p-3 text-sm outline-none"
+    />
+  );
+}
 
 /** The small card opened by tapping a glossary term or a highlight (shared by both readers). */
 export function MarkPopover({ popover, glossary, highlights, onClose }: Props) {
@@ -70,14 +110,7 @@ export function MarkPopover({ popover, glossary, highlights, onClose }: Props) {
       {highlight && (
         <>
           <p className="eyebrow mb-2">Your note</p>
-          <textarea
-            key={highlight.id}
-            defaultValue={highlight.note ?? ""}
-            onBlur={(e) => updateHighlightNote(highlight.id, e.target.value)}
-            placeholder="Add a thought…"
-            rows={3}
-            className="bg-surface border-line w-full resize-none rounded-xl border p-3 text-sm outline-none"
-          />
+          <NoteField key={highlight.id} highlight={highlight} onClose={onClose} />
           <button
             type="button"
             onClick={() => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { paginate, toViews, viewForPara, type Chunk } from "@/lib/reader/paginate";
+import { paginate, toViews, viewForPara, viewStartingAt, type Chunk } from "@/lib/reader/paginate";
 
 const LH = 20;
 const CHARS = 40;
@@ -144,5 +144,24 @@ describe("views", () => {
     expect(views[mid].last).toBeGreaterThanOrEqual(4);
     expect(viewForPara(views, Infinity)).toBe(views.length - 1);
     expect(viewForPara([], 3)).toBe(0);
+  });
+});
+
+describe("viewStartingAt", () => {
+  const view = (first: number, last: number) => ({ pages: [], first, last });
+
+  it("reopens the view that starts at a paragraph split across a page break", () => {
+    // Paragraph 14 ends one view and begins the next.
+    const views = [view(10, 14), view(14, 18), view(19, 22)];
+    expect(viewForPara(views, 14)).toBe(0);
+    expect(viewStartingAt(views, 14)).toBe(1);
+  });
+
+  it("falls back to the view that contains the paragraph, or the last view", () => {
+    const views = [view(10, 14), view(14, 18)];
+    expect(viewStartingAt(views, 16)).toBe(1);
+    expect(viewStartingAt(views, 0)).toBe(0);
+    expect(viewStartingAt(views, Infinity)).toBe(1);
+    expect(viewStartingAt([], 3)).toBe(0);
   });
 });

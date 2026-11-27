@@ -786,3 +786,88 @@ test.describe("book view", () => {
       .toBeGreaterThan(1);
   });
 });
+
+test("a highlight note is kept when the box is dismissed without tabbing out", async ({
+  page,
+  isMobile,
+}) => {
+  await scrollMode(page);
+  test.skip(isMobile, "Selection gestures are checked on desktop.");
+  await page.goto("/read/pride-and-prejudice/1", { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "Original", exact: true }).click();
+  const select = () =>
+    page.evaluate(() => {
+      const p = document.querySelector('[data-p="3"]')!;
+      const r = document.createRange();
+      r.selectNodeContents(p);
+      const s = window.getSelection()!;
+      s.removeAllRanges();
+      s.addRange(r);
+    });
+  const noteOf = () =>
+    page.evaluate(
+      () => JSON.parse(localStorage.getItem("lr:highlights:v1") ?? "[]")[0]?.note ?? "",
+    );
+
+  await select();
+  await page.getByRole("button", { name: "Highlight Sage" }).click();
+  const mark = page.locator("article mark").first();
+
+  // Clicking elsewhere closes the box; the note must survive.
+  await mark.click();
+  await page.locator("[data-popover] textarea").fill("first note");
+  await page.mouse.click(5, 400);
+  await expect(page.locator("[data-popover]")).toBeHidden();
+  expect(await noteOf()).toBe("first note");
+
+  // Escape saves and closes it too.
+  await mark.click();
+  await page.locator("[data-popover] textarea").fill("second note");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("[data-popover]")).toBeHidden();
+  expect(await noteOf()).toBe("second note");
+
+  // Removing the highlight does not resurrect it.
+  await mark.click();
+  await page.getByRole("button", { name: "Remove highlight" }).click();
+  await expect(page.locator("article mark")).toHaveCount(0);
+  expect(await page.evaluate(() => localStorage.getItem("lr:highlights:v1"))).toBe("[]");
+});
+
+test("a book page offers to continue where the reader left off", async ({ page }) => {
+  await page.goto("/books/alices-adventures-in-wonderland", { waitUntil: "networkidle" });
+  await expect(page.getByRole("link", { name: "Start reading" })).toHaveAttribute(
+    "href",
+    /\/read\/alices-adventures-in-wonderland\/1$/,
+  );
+
+  await page.evaluate(() =>
+    localStorage.setItem(
+      "lr:progress:v1",
+      JSON.stringify({
+        "alices-adventures-in-wonderland": {
+          chapter: 3,
+          paragraph: 5,
+          level: 2,
+          updatedAt: Date.now(),
+        },
+      }),
+    ),
+  );
+  await page.reload({ waitUntil: "networkidle" });
+  await expect(
+    page.getByRole("link", { name: "Continue reading · Chapter 3" }),
+  ).toHaveAttribute("href", /\/read\/alices-adventures-in-wonderland\/3$/);
+
+  // Finished books start over; progress for a chapter that does not exist is ignored.
+  await page.evaluate(() =>
+    localStorage.setItem(
+      "lr:shelf:v1",
+      JSON.stringify({
+        "alices-adventures-in-wonderland": { status: "finished", updatedAt: Date.now() },
+      }),
+    ),
+  );
+  await page.reload({ waitUntil: "networkidle" });
+  await expect(page.getByRole("link", { name: "Start reading" })).toBeVisible();
+});

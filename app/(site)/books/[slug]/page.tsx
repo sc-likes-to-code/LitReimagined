@@ -4,11 +4,11 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { BookCover } from "@/components/book/BookCover";
 import { DifficultyDots } from "@/components/book/DifficultyDots";
+import { ReadButton } from "@/components/book/ReadButton";
 import { ShelfButton } from "@/components/book/ShelfButton";
 import { Shelf } from "@/components/home/Shelf";
 import { SliderDemo } from "@/components/home/SliderDemo";
 import { Badge } from "@/components/ui/Badge";
-import { ButtonLink } from "@/components/ui/Button";
 import { repo } from "@/lib/data";
 import { publicEnv } from "@/lib/env";
 
@@ -158,9 +158,11 @@ async function BookView({ params }: { params: PageProps<"/books/[slug]">["params
 
             <div className="mt-10 flex flex-wrap items-center gap-4">
               {first ? (
-                <ButtonLink href={`/read/${book.slug}/${first.idx}`} size="lg">
-                  Start reading
-                </ButtonLink>
+                <ReadButton
+                  slug={book.slug}
+                  firstChapter={first.idx}
+                  chapters={book.chapters.map((c) => c.idx)}
+                />
               ) : (
                 <span className="text-muted text-sm">Chapters are on their way.</span>
               )}

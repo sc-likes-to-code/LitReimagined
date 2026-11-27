@@ -49,7 +49,7 @@ import {
   type BookLayout,
   type BookType,
 } from "@/lib/reader/book-layout";
-import { viewForPara, type Piece } from "@/lib/reader/paginate";
+import { viewForPara, viewStartingAt, type Piece } from "@/lib/reader/paginate";
 import {
   buildSegments,
   findGlossMarks,
@@ -418,7 +418,7 @@ function BookView({
     [chapter.glossary],
   );
   const { views, geometry, aligned } = layout;
-  const [index, setIndex] = useState(() => viewForPara(views, initialPara));
+  const [index, setIndex] = useState(() => viewStartingAt(views, initialPara));
   const [side, setSide] = useState<"orig" | "modern">("modern");
   const [hover, setHover] = useState<Zone>(null);
   /** The page turn in progress: its direction and the view it started from. */
